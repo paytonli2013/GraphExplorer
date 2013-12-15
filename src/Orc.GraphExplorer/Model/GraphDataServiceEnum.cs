@@ -5,9 +5,9 @@ using System.Text;
 
 namespace Orc.GraphExplorer.Model
 {
-    public enum DisplayMode
+    public enum GraphDataServiceEnum
     {
-        Completed = 0,
-        ThreeLevels = 1
+        Csv,
+        Factory
     }
 }

@@ -32,15 +32,21 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="GraphX">
+    <Reference Include="CsvHelper">
+      <HintPath>..\..\lib\CsvHelper.dll</HintPath>
+    </Reference>
+    <Reference Include="GraphX, Version=0.1.0.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\GraphX.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="QuickGraph">
+    <Reference Include="QuickGraph, Version=3.6.61114.0, Culture=neutral, PublicKeyToken=f3fb40175eec2af3, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\QuickGraph.dll</HintPath>
     </Reference>
-    <Reference Include="QuickGraph.Serialization">
+    <Reference Include="QuickGraph.Serialization, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\QuickGraph.Serialization.dll</HintPath>
     </Reference>
     <Reference Include="System" />
@@ -53,7 +59,8 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="WindowsBase" />
-    <Reference Include="YAXLib">
+    <Reference Include="YAXLib, Version=2.12.0.0, Culture=neutral, PublicKeyToken=7cc39f8266ad1835, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\YAXLib.dll</HintPath>
     </Reference>
   </ItemGroup>
@@ -65,6 +72,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CsvGraphDataService.cs" />
+    <Compile Include="CsvGraphDataServiceConfig.cs" />
     <Compile Include="DataLoadedEventArgs.cs" />
     <Compile Include="GraphExplorer.xaml.cs">
       <DependentUpon>GraphExplorer.xaml</DependentUpon>
@@ -76,7 +84,8 @@
     <Compile Include="Model\DisplayMode.cs" />
     <Compile Include="Model\Graph.cs" />
     <Compile Include="Model\GraphArea.cs" />
-    <Compile Include="Model\GraphExplorerConfiguration.cs" />
+    <Compile Include="Model\GraphDataServiceEnum.cs" />
+    <Compile Include="GraphExplorerConfiguration.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Assets\" />
