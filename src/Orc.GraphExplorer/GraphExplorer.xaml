@@ -1,0 +1,30 @@
+﻿<UserControl x:Class="Orc.GraphExplorer.GraphExplorer"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d"  
+             xmlns:zb="clr-namespace:GraphX.Xceed.Wpf.Toolkit.Zoombox;assembly=GraphX"
+             xmlns:local="clr-namespace:Orc.GraphExplorer.Model"  
+             d:DesignHeight="300" d:DesignWidth="300">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <zb:Zoombox x:Name="zoomctrl" Grid.Row="1">
+            <!--<local:GraphArea x:Name="Area"/>-->
+            <local:GraphArea x:Name="Area"/>
+        </zb:Zoombox>
+        <!--the menu bar-->
+        <Border VerticalAlignment="Top" Height="32" HorizontalAlignment="Stretch">
+            <Border.Effect>
+                <DropShadowEffect Color="Black" Opacity=".5" RenderingBias="Performance" ShadowDepth="1"/>
+            </Border.Effect>
+            <StackPanel Background="AliceBlue" Orientation="Horizontal">
+                <Button x:Name="btnBack" Content="&lt;-"/>
+                <Button x:Name="btnForward" Content="->"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

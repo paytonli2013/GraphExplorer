@@ -1,0 +1,9 @@
+﻿<Window x:Class="Orc.GraphExplorer.Demo.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ge="clr-namespace:Orc.GraphExplorer;assembly=Orc.GraphExplorer"
+        Title="MainWindow" Height="350" Width="525">
+    <Grid>
+        <ge:GraphExplorer GraphDataService="{Binding GraphDataService}"/>
+    </Grid>
+</Window>
