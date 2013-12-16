@@ -10,9 +10,9 @@ namespace Orc.GraphExplorer.Demo
     {
         public IGraphDataService GraphDataService
         {
-            get 
+            get
             {
-                return new MockGraphDataService();
+                return new CsvGraphDataService();
             }
         }
     }

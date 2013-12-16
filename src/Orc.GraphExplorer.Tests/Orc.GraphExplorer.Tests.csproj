@@ -71,6 +71,14 @@
     <None Include="..\Orc.GraphExplorer.Demo\App.config">
       <Link>App.config</Link>
     </None>
+    <Content Include="..\Orc.GraphExplorer.Demo\Data\Properties.csv">
+      <Link>Data\Properties.csv</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Orc.GraphExplorer.Demo\Data\Relationships.csv">
+      <Link>Data\Relationships.csv</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -12,15 +12,13 @@ namespace Orc.GraphExplorer
 {
     public class DataVertex: VertexBase
     {
-        public DateTime DateTimeValue;
         public string Title { get; set; }
         public int Id { get; set; }
 
-        [YAXDontSerialize]
-        public ImageSource DataImage { get; set; }
+        public Dictionary<string, string> Properties { get; set; }
 
         [YAXDontSerialize]
-        public ImageSource PersonImage { get; set; }
+        public ImageSource Icon { get; set; }
 
         #region Calculated or static props
         [YAXDontSerialize]
@@ -33,21 +31,6 @@ namespace Orc.GraphExplorer
         {
             return Title;
         }
-
-        private string[] imgArray = new string[4]
-        {
-            @"pack://application:,,,/GraphX;component/Images/help_black.png",
-            @"pack://application:,,,/ShowcaseExample;component/Images/skull_bw.png",
-            @"pack://application:,,,/ShowcaseExample;component/Images/wrld.png",
-            @"pack://application:,,,/ShowcaseExample;component/Images/birdy.png",
-        };
-        private string[] textArray = new string[4]
-        {
-            @"",
-            @"Skully",
-            @"Worldy",
-            @"Birdy",
-        };
 
         #endregion
 
@@ -63,6 +46,7 @@ namespace Orc.GraphExplorer
 
         public DataVertex(int id,string title = "")
         {
+            base.ID = id;
             Id = id;
             Title = title;
         }

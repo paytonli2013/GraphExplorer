@@ -81,6 +81,7 @@
     <Compile Include="IGraphDataService.cs" />
     <Compile Include="Model\DataEdge.cs" />
     <Compile Include="Model\DataVertex.cs" />
+    <Compile Include="Model\DataVertexMap.cs" />
     <Compile Include="Model\DisplayMode.cs" />
     <Compile Include="Model\Graph.cs" />
     <Compile Include="Model\GraphArea.cs" />
