@@ -48,7 +48,7 @@ namespace Orc.GraphExplorer
         {
             base.ID = id;
             Id = id;
-            Title = title;
+            Title = (title==string.Empty)?id.ToString():title;
         }
     }
 }

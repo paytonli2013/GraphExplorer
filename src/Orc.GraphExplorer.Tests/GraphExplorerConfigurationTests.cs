@@ -23,7 +23,8 @@ namespace Orc.GraphExplorer.Tests
 
             Assert.IsNotNull(setting);
 
-            Assert.AreEqual(setting.DisplayMode, DisplayMode.Completed);
+            Assert.AreEqual(setting.EnableNavigation, false);
+            Assert.AreEqual(setting.NavigateToNewTab, true);
         }
 
         [TestMethod]

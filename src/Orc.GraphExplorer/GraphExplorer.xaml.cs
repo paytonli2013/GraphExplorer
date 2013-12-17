@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using GraphX.Xceed.Wpf.Toolkit.Zoombox;
 using GraphX.GraphSharp.Algorithms.Layout.Simple.FDP;
 using GraphX.GraphSharp.Algorithms.OverlapRemoval;
+using GraphX.GraphSharp.Algorithms.Layout.Simple.Hierarchical;
 
 namespace Orc.GraphExplorer
 {
@@ -24,7 +25,7 @@ namespace Orc.GraphExplorer
     /// </summary>
     public partial class GraphExplorer : UserControl
     {
-        IGraphDataService _graphDataService;
+        //IGraphDataService _graphDataService;
 
         //default constructor, no service be injected
         public GraphExplorer()
@@ -55,16 +56,7 @@ namespace Orc.GraphExplorer
         {
             Zoombox.SetViewFinderVisibility(zoomctrl, System.Windows.Visibility.Visible);
             zoomctrl.FillToBounds();
-
-            //This property sets layout algorithm that will be used to calculate vertices positions
-            //Different algorithms uses different values and some of them uses edge Weight property.
-            Area.DefaultLayoutAlgorithm = GraphX.LayoutAlgorithmTypeEnum.KK;
-            //Now we can set parameters for selected algorithm using AlgorithmFactory property. This property provides methods for
-            //creating all available algorithms and algo parameters.
-            Area.DefaultLayoutAlgorithmParams = Area.AlgorithmFactory.CreateLayoutParameters(GraphX.LayoutAlgorithmTypeEnum.KK);
-            //Unfortunately to change algo parameters you need to specify params type which is different for every algorithm.
-            ((KKLayoutParameters)Area.DefaultLayoutAlgorithmParams).MaxIterations = 100;
-
+            
             //This property sets vertex overlap removal algorithm.
             //Such algorithms help to arrange vertices in the layout so no one overlaps each other.
             Area.DefaultOverlapRemovalAlgorithm = GraphX.OverlapRemovalAlgorithmTypeEnum.FSA;
@@ -80,7 +72,7 @@ namespace Orc.GraphExplorer
             //This property sets async algorithms computation so methods like: Area.RelayoutGraph() and Area.GenerateGraph()
             //will run async with the UI thread. Completion of the specified methods can be catched by corresponding events:
             //Area.RelayoutFinished and Area.GenerateGraphFinished.
-            Area.AsyncAlgorithmCompute = false;
+            Area.AsyncAlgorithmCompute = true;
         }
 
         void OnVertexesLoaded(IEnumerable<DataVertex> vertexes)
@@ -93,6 +85,7 @@ namespace Orc.GraphExplorer
         {
             Edges = edges;
             UpdateGraphArea();
+            zoomctrl.FitToBounds();
         }
 
         private void UpdateGraphArea()
@@ -107,6 +100,8 @@ namespace Orc.GraphExplorer
             {
                 graph.AddEdge(edge);
             }
+
+            Area.ExternalLayoutAlgorithm = new TopologicalLayoutAlgorithm<DataVertex, DataEdge, QuickGraph.BidirectionalGraph<DataVertex, DataEdge>>(graph);
 
             Area.GenerateGraph(graph, true, true);
         }

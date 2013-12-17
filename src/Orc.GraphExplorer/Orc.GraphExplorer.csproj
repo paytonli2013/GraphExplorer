@@ -39,6 +39,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\GraphX.dll</HintPath>
     </Reference>
+    <Reference Include="Orc.Sort">
+      <HintPath>..\..\lib\Orc.Sort.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="QuickGraph, Version=3.6.61114.0, Culture=neutral, PublicKeyToken=f3fb40175eec2af3, processorArchitecture=MSIL">
@@ -65,6 +68,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Assets\ThemedGraphXTemplates.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
     <Page Include="GraphExplorer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -79,9 +86,9 @@
     </Compile>
     <Compile Include="IDataProvider.cs" />
     <Compile Include="IGraphDataService.cs" />
+    <Compile Include="TopologicalLayoutAlgorithm.cs" />
     <Compile Include="Model\DataEdge.cs" />
     <Compile Include="Model\DataVertex.cs" />
-    <Compile Include="Model\DataVertexMap.cs" />
     <Compile Include="Model\DisplayMode.cs" />
     <Compile Include="Model\Graph.cs" />
     <Compile Include="Model\GraphArea.cs" />
@@ -89,7 +96,7 @@
     <Compile Include="GraphExplorerConfiguration.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Assets\" />
+    <Resource Include="Assets\appbar.people.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -53,11 +53,18 @@ namespace Orc.GraphExplorer
 
     public class GraphExplorerSetting : ConfigurationElement
     {
-        [ConfigurationProperty("mode", DefaultValue = DisplayMode.Completed)]
-        public DisplayMode DisplayMode
+        [ConfigurationProperty("enableNavigation",IsRequired = false, DefaultValue = false)]
+        public bool EnableNavigation
         {
-            get { return (DisplayMode)base["mode"]; }
-            set { base["mode"] = value; }
+            get { return (bool)base["enableNavigation"]; }
+            set { base["enableNavigation"] = value; }
+        }
+
+        [ConfigurationProperty("navigateToNewTab", IsRequired = false, DefaultValue = true)]
+        public bool NavigateToNewTab
+        {
+            get { return (bool)base["navigateToNewTab"]; }
+            set { base["navigateToNewTab"] = value; }
         }
     }
 }

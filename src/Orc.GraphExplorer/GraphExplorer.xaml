@@ -7,14 +7,20 @@
              xmlns:zb="clr-namespace:GraphX.Xceed.Wpf.Toolkit.Zoombox;assembly=GraphX"
              xmlns:local="clr-namespace:Orc.GraphExplorer.Model"  
              d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Assets/ThemedGraphXTemplates.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <zb:Zoombox x:Name="zoomctrl" Grid.Row="1">
-            <!--<local:GraphArea x:Name="Area"/>-->
-            <local:GraphArea x:Name="Area"/>
+            <local:GraphArea x:Name="Area" />
         </zb:Zoombox>
         <!--the menu bar-->
         <Border VerticalAlignment="Top" Height="32" HorizontalAlignment="Stretch">
