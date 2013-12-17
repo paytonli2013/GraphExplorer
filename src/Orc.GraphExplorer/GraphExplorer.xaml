@@ -20,7 +20,13 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <TabControl HorizontalAlignment="Stretch" Grid.Row="1" VerticalAlignment="Stretch">
-            <TabItem Header="Overall" Name="overrallTab" >
+            <TabItem  Name="overrallTab" >
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Overrall" VerticalAlignment="Center"/>
+                        <Button Height="22" Width="22" Name="btnRefresh" Style="{StaticResource RefershButtonStyle}" Click="btnRefresh_Click"/>
+                    </StackPanel>
+                </TabItem.Header>
                 <zb:Zoombox x:Name="zoomctrl" >
                     <local:GraphArea x:Name="Area" />
                 </zb:Zoombox>
@@ -33,7 +39,7 @@
         </TabControl>
 
         <!--the menu bar-->
-        <Border VerticalAlignment="Top" Height="32" HorizontalAlignment="Stretch" Visibility="Collapsed">
+        <!--<Border VerticalAlignment="Top" Height="32" HorizontalAlignment="Stretch" Visibility="Collapsed">
             <Border.Effect>
                 <DropShadowEffect Color="Black" Opacity=".5" RenderingBias="Performance" ShadowDepth="1"/>
             </Border.Effect>
@@ -41,6 +47,6 @@
                 <Button x:Name="btnBack" Content="&lt;-"/>
                 <Button x:Name="btnForward" Content="->"/>
             </StackPanel>
-        </Border>
+        </Border>-->
     </Grid>
 </UserControl>

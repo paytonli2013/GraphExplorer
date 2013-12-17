@@ -17,6 +17,7 @@ using GraphX.Xceed.Wpf.Toolkit.Zoombox;
 using GraphX.GraphSharp.Algorithms.Layout.Simple.FDP;
 using GraphX.GraphSharp.Algorithms.OverlapRemoval;
 using GraphX.GraphSharp.Algorithms.Layout.Simple.Hierarchical;
+using System.Windows.Threading;
 
 namespace Orc.GraphExplorer
 {
@@ -29,6 +30,10 @@ namespace Orc.GraphExplorer
 
         //default constructor, no service be injected
         bool _isNavAreaInit = false;
+
+        Queue<NavigateHistoryItem> _navigateHistory = new Queue<NavigateHistoryItem>();
+
+        DataVertex _currentNavItem;
 
         public GraphExplorer()
         {
@@ -58,15 +63,24 @@ namespace Orc.GraphExplorer
             //throw new NotImplementedException();
             var vertex = args.VertexControl.DataContext as DataVertex;
 
-            if (vertex == null)
+            if (vertex == null || vertex == _currentNavItem)
                 return;
+
+            _currentNavItem = vertex;
+
+            var degree = Area.Graph.Degree(vertex);
+
+            if (degree < 1)
+                return;
+
+            NavigateTo(vertex, Area.Graph);
         }
 
         void Area_VertexDoubleClick(object sender, GraphX.Models.VertexSelectedEventArgs args)
         {
             var vertex = args.VertexControl.DataContext as DataVertex;
 
-            if(vertex==null)
+            if (vertex == null || vertex == _currentNavItem)
                 return;
 
             var degree = Area.Graph.Degree(vertex);
@@ -74,14 +88,92 @@ namespace Orc.GraphExplorer
             if (degree < 1)
                 return;
 
-            UpdateNavGraphArea(vertex, Area.Graph);
-            navTab.Visibility = System.Windows.Visibility.Visible;
+            NavigateTo(vertex, Area.Graph);
+
+            if (navTab.Visibility != System.Windows.Visibility.Visible)
+                navTab.Visibility = System.Windows.Visibility.Visible;
+
             navTab.IsSelected = true;
         }
 
-        private void UpdateNavGraphArea(DataVertex dataVertex, QuickGraph.BidirectionalGraph<DataVertex, DataEdge> overrallGraph)
+        private void NavigateTo(DataVertex dataVertex, QuickGraph.BidirectionalGraph<DataVertex, DataEdge> overrallGraph)
         {
             //overrallGraph.get
+            var historyItem = GetHistoryItem(dataVertex, overrallGraph);
+
+            var graph = new Graph();
+
+            foreach (var vertex in historyItem.Vertexes)
+            {
+                graph.AddVertex(vertex);
+            }
+
+            foreach (var edge in historyItem.Edges)
+            {
+                graph.AddEdge(edge);
+            }
+
+            AreaNav.ExternalLayoutAlgorithm = new TopologicalLayoutAlgorithm<DataVertex, DataEdge, QuickGraph.BidirectionalGraph<DataVertex, DataEdge>>(graph);
+
+            AreaNav.GenerateGraph(graph, true, true);
+
+            var dispatcher = AreaNav.Dispatcher;
+
+            if (dispatcher != null)
+            {
+                dispatcher.BeginInvoke(new Action(()
+                    =>
+                    {
+                        zoomctrlNav.FitToBounds();
+                    }), DispatcherPriority.Normal);
+            }
+            else
+            {
+                zoomctrlNav.FitToBounds();
+            }
+        }
+
+        private NavigateHistoryItem GetHistoryItem(DataVertex v, QuickGraph.BidirectionalGraph<DataVertex, DataEdge> overrallGraph)
+        {
+            var hisItem = new NavigateHistoryItem();
+
+            IEnumerable<DataEdge> outs;
+            IEnumerable<DataEdge> ins;
+
+            overrallGraph.TryGetInEdges(v, out ins);
+
+            var edges = new List<DataEdge>();
+
+            if (overrallGraph.TryGetOutEdges(v, out outs))
+            {
+                edges.AddRange(outs);
+            }
+
+            if (overrallGraph.TryGetInEdges(v, out ins))
+            {
+                edges.AddRange(ins);
+            }
+
+            if (edges.Count > 0)
+            {
+                List<DataVertex> vertexes = new List<DataVertex>();
+                foreach (var e in edges)
+                {
+                    if (!vertexes.Contains(e.Source))
+                    {
+                        vertexes.Add(e.Source);
+                    }
+
+                    if (!vertexes.Contains(e.Target))
+                    {
+                        vertexes.Add(e.Target);
+                    }
+                }
+                hisItem.Edges = edges;
+                hisItem.Vertexes = vertexes;
+            }
+
+            return hisItem;
         }
 
         void GetEdges()
@@ -89,11 +181,11 @@ namespace Orc.GraphExplorer
             GraphDataService.GetEdges(OnEdgeLoaded, OnError);
         }
 
-        void ApplySetting(Zoombox zoom,GraphArea area)
+        void ApplySetting(Zoombox zoom, GraphArea area)
         {
             Zoombox.SetViewFinderVisibility(zoom, System.Windows.Visibility.Visible);
             zoom.FillToBounds();
-            
+
             //This property sets vertex overlap removal algorithm.
             //Such algorithms help to arrange vertices in the layout so no one overlaps each other.
             area.DefaultOverlapRemovalAlgorithm = GraphX.OverlapRemovalAlgorithmTypeEnum.FSA;
@@ -114,7 +206,7 @@ namespace Orc.GraphExplorer
 
         void OnVertexesLoaded(IEnumerable<DataVertex> vertexes)
         {
-            Vertexes=new List<DataVertex>(vertexes);
+            Vertexes = new List<DataVertex>(vertexes);
             UpdateGraphArea();
             zoomctrl.FitToBounds();
         }
@@ -221,7 +313,31 @@ namespace Orc.GraphExplorer
             if (e.NewValue != null)
             {
                 var ge = (GraphExplorer)d;
-                ge.ApplySetting(ge.zoomctrl,ge.Area);
+                ge.ApplySetting(ge.zoomctrl, ge.Area);
+            }
+        }
+
+        private void btnRefresh_Click(object sender, RoutedEventArgs e)
+        {
+            var dispatcher = Area.Dispatcher;
+
+            overrallTab.IsSelected = true;
+
+            if (dispatcher != null)
+            {
+                dispatcher.BeginInvoke(new Action(()
+                    =>
+                {
+                    UpdateGraphArea();
+
+                    zoomctrl.FitToBounds();
+                }), DispatcherPriority.Normal);
+            }
+            else
+            {
+                UpdateGraphArea();
+
+                zoomctrl.FitToBounds();
             }
         }
     }

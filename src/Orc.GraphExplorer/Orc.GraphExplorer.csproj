@@ -83,6 +83,7 @@
     </Compile>
     <Compile Include="IDataProvider.cs" />
     <Compile Include="IGraphDataService.cs" />
+    <Compile Include="NavigateHistoryItem.cs" />
     <Compile Include="TopologicalLayoutAlgorithm.cs" />
     <Compile Include="Model\DataEdge.cs" />
     <Compile Include="Model\DataVertex.cs" />
@@ -94,6 +95,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Assets\appbar.people.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\appbar.refresh.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
