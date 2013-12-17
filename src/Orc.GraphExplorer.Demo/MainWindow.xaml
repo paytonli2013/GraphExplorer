@@ -1,8 +1,7 @@
-﻿<controls:MetroWindow x:Class="Orc.GraphExplorer.Demo.MainWindow"
-        xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+﻿<Window x:Class="Orc.GraphExplorer.Demo.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:ge="clr-namespace:Orc.GraphExplorer;assembly=Orc.GraphExplorer" GlowBrush="{StaticResource AccentColorBrush}" ResizeMode="CanResizeWithGrip"
+        xmlns:ge="clr-namespace:Orc.GraphExplorer;assembly=Orc.GraphExplorer" 
         Title="Graph Explorer Demo" Height="600" Width="780">
     <Grid>
         <!--<Grid.Effect>
@@ -10,4 +9,4 @@
         </Grid.Effect>-->
         <ge:GraphExplorer GraphDataService="{Binding GraphDataService}"/>
     </Grid>
-</controls:MetroWindow>
+</Window>

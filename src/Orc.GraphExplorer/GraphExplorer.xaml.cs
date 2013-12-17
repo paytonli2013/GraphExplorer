@@ -28,11 +28,17 @@ namespace Orc.GraphExplorer
         //IGraphDataService _graphDataService;
 
         //default constructor, no service be injected
+        bool _isNavAreaInit = false;
+
         public GraphExplorer()
         {
             InitializeComponent();
 
-            ApplySetting();
+            ApplySetting(zoomctrl, Area);
+            ApplySetting(zoomctrlNav, AreaNav);
+
+            Area.VertexDoubleClick += Area_VertexDoubleClick;
+            AreaNav.VertexDoubleClick += AreaNav_VertexDoubleClick;
         }
 
         //another constructor for inject IGraphDataService to graph explorer
@@ -47,32 +53,63 @@ namespace Orc.GraphExplorer
                 };
         }
 
+        void AreaNav_VertexDoubleClick(object sender, GraphX.Models.VertexSelectedEventArgs args)
+        {
+            //throw new NotImplementedException();
+            var vertex = args.VertexControl.DataContext as DataVertex;
+
+            if (vertex == null)
+                return;
+        }
+
+        void Area_VertexDoubleClick(object sender, GraphX.Models.VertexSelectedEventArgs args)
+        {
+            var vertex = args.VertexControl.DataContext as DataVertex;
+
+            if(vertex==null)
+                return;
+
+            var degree = Area.Graph.Degree(vertex);
+
+            if (degree < 1)
+                return;
+
+            UpdateNavGraphArea(vertex, Area.Graph);
+            navTab.Visibility = System.Windows.Visibility.Visible;
+            navTab.IsSelected = true;
+        }
+
+        private void UpdateNavGraphArea(DataVertex dataVertex, QuickGraph.BidirectionalGraph<DataVertex, DataEdge> overrallGraph)
+        {
+            //overrallGraph.get
+        }
+
         void GetVertexes()
         {
             GraphDataService.GetVertexes(OnVertexesLoaded, OnError);
         }
 
-        void ApplySetting()
+        void ApplySetting(Zoombox zoom,GraphArea area)
         {
-            Zoombox.SetViewFinderVisibility(zoomctrl, System.Windows.Visibility.Visible);
-            zoomctrl.FillToBounds();
+            Zoombox.SetViewFinderVisibility(zoom, System.Windows.Visibility.Visible);
+            zoom.FillToBounds();
             
             //This property sets vertex overlap removal algorithm.
             //Such algorithms help to arrange vertices in the layout so no one overlaps each other.
-            Area.DefaultOverlapRemovalAlgorithm = GraphX.OverlapRemovalAlgorithmTypeEnum.FSA;
-            Area.DefaultOverlapRemovalAlgorithmParams = Area.AlgorithmFactory.CreateOverlapRemovalParameters(GraphX.OverlapRemovalAlgorithmTypeEnum.FSA);
-            ((OverlapRemovalParameters)Area.DefaultOverlapRemovalAlgorithmParams).HorizontalGap = 50;
-            ((OverlapRemovalParameters)Area.DefaultOverlapRemovalAlgorithmParams).VerticalGap = 50;
+            area.DefaultOverlapRemovalAlgorithm = GraphX.OverlapRemovalAlgorithmTypeEnum.FSA;
+            area.DefaultOverlapRemovalAlgorithmParams = Area.AlgorithmFactory.CreateOverlapRemovalParameters(GraphX.OverlapRemovalAlgorithmTypeEnum.FSA);
+            ((OverlapRemovalParameters)area.DefaultOverlapRemovalAlgorithmParams).HorizontalGap = 50;
+            ((OverlapRemovalParameters)area.DefaultOverlapRemovalAlgorithmParams).VerticalGap = 50;
 
             //This property sets edge routing algorithm that is used to build route paths according to algorithm logic.
             //For ex., SimpleER algorithm will try to set edge paths around vertices so no edge will intersect any vertex.
             //Bundling algorithm will try to tie different edges that follows same direction to a single channel making complex graphs more appealing.
-            Area.DefaultEdgeRoutingAlgorithm = GraphX.EdgeRoutingAlgorithmTypeEnum.SimpleER;
+            area.DefaultEdgeRoutingAlgorithm = GraphX.EdgeRoutingAlgorithmTypeEnum.SimpleER;
 
             //This property sets async algorithms computation so methods like: Area.RelayoutGraph() and Area.GenerateGraph()
             //will run async with the UI thread. Completion of the specified methods can be catched by corresponding events:
             //Area.RelayoutFinished and Area.GenerateGraphFinished.
-            Area.AsyncAlgorithmCompute = true;
+            area.AsyncAlgorithmCompute = true;
         }
 
         void OnVertexesLoaded(IEnumerable<DataVertex> vertexes)
@@ -182,7 +219,10 @@ namespace Orc.GraphExplorer
         void SettingChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (e.NewValue != null)
-                ((GraphExplorer)d).ApplySetting();
+            {
+                var ge = (GraphExplorer)d;
+                ge.ApplySetting(ge.zoomctrl,ge.Area);
+            }
         }
     }
 

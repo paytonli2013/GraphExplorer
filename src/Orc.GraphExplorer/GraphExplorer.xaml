@@ -14,16 +14,26 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
-    <Grid>
+    <Grid Name="root">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <zb:Zoombox x:Name="zoomctrl" Grid.Row="1">
-            <local:GraphArea x:Name="Area" />
-        </zb:Zoombox>
+        <TabControl HorizontalAlignment="Stretch" Grid.Row="1" VerticalAlignment="Stretch">
+            <TabItem Header="Overall" Name="overrallTab" >
+                <zb:Zoombox x:Name="zoomctrl" >
+                    <local:GraphArea x:Name="Area" />
+                </zb:Zoombox>
+            </TabItem>
+            <TabItem Header="Navigate" Name="navTab" Visibility="Hidden">
+                <zb:Zoombox x:Name="zoomctrlNav" >
+                    <local:GraphArea x:Name="AreaNav" />
+                </zb:Zoombox>
+            </TabItem>
+        </TabControl>
+
         <!--the menu bar-->
-        <Border VerticalAlignment="Top" Height="32" HorizontalAlignment="Stretch">
+        <Border VerticalAlignment="Top" Height="32" HorizontalAlignment="Stretch" Visibility="Collapsed">
             <Border.Effect>
                 <DropShadowEffect Color="Black" Opacity=".5" RenderingBias="Performance" ShadowDepth="1"/>
             </Border.Effect>
