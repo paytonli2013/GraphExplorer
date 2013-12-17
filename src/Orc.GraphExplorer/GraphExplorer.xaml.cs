@@ -44,6 +44,22 @@ namespace Orc.GraphExplorer
 
             Area.VertexDoubleClick += Area_VertexDoubleClick;
             AreaNav.VertexDoubleClick += AreaNav_VertexDoubleClick;
+
+            this.Loaded += (s, e) =>
+            {
+                var defaultSvc = GraphExplorerSection.Current.DefaultGraphDataService;
+
+                switch (defaultSvc)
+                {
+                    case GraphDataServiceEnum.Csv:
+                        GraphDataService = new CsvGraphDataService();
+                        break;
+                    case GraphDataServiceEnum.Factory:
+                        break;
+                    default:
+                        break;
+                }
+            };
         }
 
         //another constructor for inject IGraphDataService to graph explorer
@@ -80,8 +96,10 @@ namespace Orc.GraphExplorer
         {
             var vertex = args.VertexControl.DataContext as DataVertex;
 
-            if (vertex == null || vertex == _currentNavItem)
+            if (vertex == null)
                 return;
+
+            _currentNavItem = vertex;
 
             var degree = Area.Graph.Degree(vertex);
 
@@ -125,7 +143,7 @@ namespace Orc.GraphExplorer
                     =>
                     {
                         zoomctrlNav.FitToBounds();
-                    }), DispatcherPriority.Normal);
+                    }), DispatcherPriority.Background);
             }
             else
             {
@@ -323,6 +341,8 @@ namespace Orc.GraphExplorer
 
             overrallTab.IsSelected = true;
 
+            int vCount = Vertexes.Count();
+
             if (dispatcher != null)
             {
                 dispatcher.BeginInvoke(new Action(()
@@ -330,14 +350,21 @@ namespace Orc.GraphExplorer
                 {
                     UpdateGraphArea();
 
-                    zoomctrl.FitToBounds();
+                    if (vCount > 2)
+                        zoomctrl.FitToBounds();
+                    else
+                        zoomctrl.CenterContent();
+
                 }), DispatcherPriority.Normal);
             }
             else
             {
                 UpdateGraphArea();
 
-                zoomctrl.FitToBounds();
+                if (vCount > 2)
+                    zoomctrl.FitToBounds();
+                else
+                    zoomctrl.CenterContent();
             }
         }
     }

@@ -7,6 +7,6 @@
         <!--<Grid.Effect>
             <DropShadowEffect Color="Gray" Direction="315" Opacity=".5" RenderingBias="Performance" ShadowDepth="6"/>
         </Grid.Effect>-->
-        <ge:GraphExplorer GraphDataService="{Binding GraphDataService}"/>
+        <ge:GraphExplorer/>
     </Grid>
 </Window>
