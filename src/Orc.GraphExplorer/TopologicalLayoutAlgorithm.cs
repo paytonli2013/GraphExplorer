@@ -37,7 +37,7 @@ namespace Orc.GraphExplorer
 
             foreach (var item in esla.VertexPositions)
             {
-                vertexPositions.Add(item.Key, new Point(item.Value.Y, item.Value.X));
+                vertexPositions.Add(item.Key, new Point(item.Value.Y*1.5, item.Value.X));
             }
         }
 

@@ -55,10 +55,11 @@ namespace Orc.GraphExplorer
         {
             try
             {
-                InnerGetVertxes();
+                if (vCache==null)
+                    InnerGetVertxes();
 
                 if (onSuccess != null)
-                    onSuccess.Invoke(vlist);
+                    onSuccess.Invoke(vCache.Select(i=>i.Value));
             }
             catch (Exception error)
             {
@@ -84,14 +85,26 @@ namespace Orc.GraphExplorer
                 vlist = PopulateVertexes(records);
             }
 
-            vCache = UpdateVertexCache(vlist);
+            vCache = MergeVertexesCache(vlist, new Dictionary<int, DataVertex>());
         }
 
         // Summary:
         //   keep & maintain a dictionary for caching DataVertex in case edges creation
-        private static Dictionary<int, DataVertex> UpdateVertexCache(List<DataVertex> vlist)
+        private static Dictionary<int, DataVertex> MergeVertexesCache(List<DataVertex> vlist,Dictionary<int, DataVertex> cache)
         {
-            return vlist.ToDictionary((d) => d.ID, d => d);
+            foreach (var item in vlist)
+            {
+                if (cache.ContainsKey(item.Id))
+                {
+                    cache[item.Id] = item;
+                }
+                else
+                {
+                    cache.Add(item.Id, item);
+                }
+            }
+
+            return cache;
         }
 
         // Summary:
@@ -149,10 +162,20 @@ namespace Orc.GraphExplorer
                         DataVertex from = null;
                         DataVertex to = null;
 
-                        if (vCache.TryGetValue(fromId, out from) && vCache.TryGetValue(toId, out to))
+                        if (!vCache.TryGetValue(fromId, out from))
                         {
-                            list.Add(new DataEdge(from, to));
+                            from = new DataVertex(fromId);
+                            vCache.Add(fromId, from);
                         }
+
+                        if (!vCache.TryGetValue(toId, out to))
+                        {
+                            to = new DataVertex(toId);
+                            vCache.Add(toId, to);
+                        }
+
+                        list.Add(new DataEdge(from, to));
+                        //}
                     }
 
                     if (onSuccess != null)
@@ -164,6 +187,12 @@ namespace Orc.GraphExplorer
                 if (onFail != null)
                     onFail.Invoke(error);
             }
+        }
+
+
+        public void Clear()
+        {
+            vCache.Clear();
         }
     }
 }

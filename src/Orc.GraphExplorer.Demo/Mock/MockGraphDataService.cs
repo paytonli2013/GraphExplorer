@@ -55,5 +55,11 @@ namespace Orc.GraphExplorer.Demo.Mock
                 onSuccess.Invoke(list);
             }
         }
+
+
+        public void Clear()
+        {
+            //throw new NotImplementedException();
+        }
     }
 }

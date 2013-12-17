@@ -84,9 +84,9 @@ namespace Orc.GraphExplorer
             //overrallGraph.get
         }
 
-        void GetVertexes()
+        void GetEdges()
         {
-            GraphDataService.GetVertexes(OnVertexesLoaded, OnError);
+            GraphDataService.GetEdges(OnEdgeLoaded, OnError);
         }
 
         void ApplySetting(Zoombox zoom,GraphArea area)
@@ -114,15 +114,15 @@ namespace Orc.GraphExplorer
 
         void OnVertexesLoaded(IEnumerable<DataVertex> vertexes)
         {
-            Vertexes = vertexes;
-            GraphDataService.GetEdges(OnEdgeLoaded, OnError);
+            Vertexes=new List<DataVertex>(vertexes);
+            UpdateGraphArea();
+            zoomctrl.FitToBounds();
         }
 
         void OnEdgeLoaded(IEnumerable<DataEdge> edges)
         {
             Edges = edges;
-            UpdateGraphArea();
-            zoomctrl.FitToBounds();
+            GraphDataService.GetVertexes(OnVertexesLoaded, OnError);
         }
 
         private void UpdateGraphArea()
@@ -156,7 +156,7 @@ namespace Orc.GraphExplorer
 
         // Using a DependencyProperty as the backing store for Vertexes.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty VertexesProperty =
-            DependencyProperty.Register("Vertexes", typeof(IEnumerable<DataVertex>), typeof(GraphExplorer), new PropertyMetadata(null, VertexesChanged));
+            DependencyProperty.Register("Vertexes", typeof(IEnumerable<DataVertex>), typeof(GraphExplorer), new PropertyMetadata(new List<DataVertex>(), VertexesChanged));
 
         static void VertexesChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -202,7 +202,7 @@ namespace Orc.GraphExplorer
         {
             if (e.NewValue != null)
             {
-                ((GraphExplorer)d).GetVertexes();
+                ((GraphExplorer)d).GetEdges();
             }
         }
 

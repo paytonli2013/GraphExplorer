@@ -29,7 +29,7 @@
         <Setter Property="Foreground" Value="{StaticResource NormalForegroudBrush}"/>
         <Setter Property="FontSize" Value="18" />
         <Setter Property="Margin" Value="2"/>
-        <Setter Property="MinHeight" Value="180"/>
+        <Setter Property="MinHeight" Value="120"/>
         <Setter Property="MinWidth" Value="180"/>
         <Setter Property="Template">
 			<Setter.Value>
