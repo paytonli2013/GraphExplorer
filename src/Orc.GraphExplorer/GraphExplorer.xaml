@@ -5,7 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d"  
              xmlns:zb="clr-namespace:GraphX.Xceed.Wpf.Toolkit.Zoombox;assembly=GraphX"
-             xmlns:local="clr-namespace:Orc.GraphExplorer.Model"  
+             xmlns:model="clr-namespace:Orc.GraphExplorer.Model"  
+             xmlns:local="clr-namespace:Orc.GraphExplorer" 
              d:DesignHeight="300" d:DesignWidth="300">
     <UserControl.Resources>
         <ResourceDictionary>
@@ -16,23 +17,22 @@
     </UserControl.Resources>
     <Grid Name="root">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <TabControl HorizontalAlignment="Stretch" Grid.Row="1" VerticalAlignment="Stretch">
+        <TabControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <TabItem  Name="overrallTab" Padding="4,1">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock FontWeight="Bold" Text="Overrall" VerticalAlignment="Center"/>
-                        <Button Margin="8,0,0,0" Height="28" Width="28" Name="btnSave" Style="{StaticResource SaveButtonStyle}" Click="btnSave_Click"/>
-                        <Button Height="28" Width="28" Name="btnLoad" Style="{StaticResource LoadButtonStyle}" Click="btnLoad_Click"/>
-
-                        <Button Height="28" Width="28" Name="btnExport" Style="{StaticResource ExportButtonStyle}" Click="btnExport_Click"/>
-                        <Button Height="28" Width="28" Name="btnRefresh" Style="{StaticResource RefershButtonStyle}" Click="btnRefresh_Click"/>
+                        <Button Margin="8,0,0,0" ToolTip="Save Layout To File"  Height="28" Width="28" Name="btnSave" Style="{StaticResource SaveButtonStyle}" Click="btnSave_Click"/>
+                        <Button Height="28" Width="28" ToolTip="Load Layout From File"  Name="btnLoad" Style="{StaticResource LoadButtonStyle}" Click="btnLoad_Click"/>
+                        <Button Height="28" Width="28" ToolTip="Save As Image" Name="btnExport" Style="{StaticResource ExportButtonStyle}" Click="btnExport_Click"/>
+                        <ToggleButton Style="{StaticResource DragToggleButtonStyle}" Height="28" Width="28" ToolTip="Enable Drag" Name="tbtnCanDrag" Click="tbtnCanDrag_Click"/>
+                        <Button Height="28" Content="Refresh" ToolTip="Refresh Graph" Width="28" Name="btnRefresh" Style="{StaticResource RefershButtonStyle}" Click="btnRefresh_Click"/>
                     </StackPanel>
                 </TabItem.Header>
                 <zb:Zoombox x:Name="zoomctrl">
-                    <local:GraphArea x:Name="Area"/>
+                    <model:GraphArea x:Name="Area"/>
                 </zb:Zoombox>
             </TabItem>
             <TabItem Name="navTab" Visibility="Hidden" Padding="4,1">
@@ -43,11 +43,10 @@
                             <Button Margin="6,0,0,0"  Height="28" Width="28" Name="btnExportNav" Style="{StaticResource ExportButtonStyle}" Click="btnExportNav_Click"/>
                             <Button Height="28" Width="28" Name="btnClose" Style="{StaticResource CloseButtonStyle}" Click="btnClose_Click"/>
                         </StackPanel>
-                       
                     </StackPanel>
                 </TabItem.Header>
                 <zb:Zoombox x:Name="zoomctrlNav" >
-                    <local:GraphArea x:Name="AreaNav" />
+                    <model:GraphArea x:Name="AreaNav" />
                 </zb:Zoombox>
             </TabItem>
         </TabControl>
@@ -62,5 +61,7 @@
                 <Button x:Name="btnForward" Content="->"/>
             </StackPanel>
         </Border>-->
+        <Button Height="28" Width="28" Margin="6,2" VerticalAlignment="Top" HorizontalAlignment="Right" Style="{StaticResource SettingButtonStyle}" ToolTip="Open Setting" Name="btnSetting" Click="btnSetting_Click"/>
+        <local:SettingView Grid.RowSpan="2" Visibility="Collapsed" SettingApplied="settingView_SettingApplied" x:Name="settingView"/>
     </Grid>
 </UserControl>

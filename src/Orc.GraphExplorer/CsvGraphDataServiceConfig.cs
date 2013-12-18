@@ -8,16 +8,11 @@ namespace Orc.GraphExplorer
 {
     public class CsvGraphDataServiceConfig : ConfigurationElement
     {
-        private static GraphExplorerSection _setting;
-
         public static CsvGraphDataServiceConfig Current
         {
             get
             {
-                if (_setting == null)
-                    _setting = ConfigurationManager.GetSection("graphExplorer") as GraphExplorerSection;
-
-                return _setting.CsvGraphDataServiceConfig;
+                return GraphExplorerSection.Current.CsvGraphDataServiceConfig;
             }
         }
 

@@ -52,6 +52,8 @@
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -65,10 +67,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="SettingView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Resource Include="Assets\ThemedGraphXTemplates.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Resource>
+    <Page Include="FilePicker.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="GraphExplorer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -78,12 +88,19 @@
     <Compile Include="CsvGraphDataService.cs" />
     <Compile Include="CsvGraphDataServiceConfig.cs" />
     <Compile Include="DataLoadedEventArgs.cs" />
+    <Compile Include="FilePicker.xaml.cs">
+      <DependentUpon>FilePicker.xaml</DependentUpon>
+    </Compile>
     <Compile Include="GraphExplorer.xaml.cs">
       <DependentUpon>GraphExplorer.xaml</DependentUpon>
     </Compile>
     <Compile Include="IDataProvider.cs" />
     <Compile Include="IGraphDataService.cs" />
     <Compile Include="NavigateHistoryItem.cs" />
+    <Compile Include="SettingView.xaml.cs">
+      <DependentUpon>SettingView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SettingViewCloseEventHandler.cs" />
     <Compile Include="TopologicalLayoutAlgorithm.cs" />
     <Compile Include="Model\DataEdge.cs" />
     <Compile Include="Model\DataVertex.cs" />
@@ -106,6 +123,18 @@
   <ItemGroup>
     <Resource Include="Assets\appbar.folder.open.png" />
     <Resource Include="Assets\appbar.image.export.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\appbar.edit.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\appbar.settings.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\appbar.page.png.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\appbar.cursor.hand.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

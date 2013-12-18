@@ -28,6 +28,9 @@ namespace Orc.GraphExplorer
     /// </summary>
     public partial class GraphExplorer : UserControl
     {
+        bool _canDrag;
+
+        bool _canDragNav;
 
         Queue<NavigateHistoryItem> _navigateHistory = new Queue<NavigateHistoryItem>();
 
@@ -234,6 +237,8 @@ namespace Orc.GraphExplorer
 
         private void UpdateGraphArea()
         {
+            Area.ClearLayout();
+
             var graph = new Graph();
             foreach (var vertex in Vertexes)
             {
@@ -334,6 +339,11 @@ namespace Orc.GraphExplorer
 
         private void btnRefresh_Click(object sender, RoutedEventArgs e)
         {
+            InnerRefreshGraph();
+        }
+
+        private void InnerRefreshGraph()
+        {
             var dispatcher = Area.Dispatcher;
 
             overrallTab.IsSelected = true;
@@ -425,33 +435,44 @@ namespace Orc.GraphExplorer
             Area.ExportAsPNG();
         }
 
-        private void EnableDrag(GraphArea area)
-        {
-            foreach (var item in area.VertexList)
-            {
-                DragBehaviour.SetIsDragEnabled(item.Value, true);
-                item.Value.EventOptions.PositionChangeNotification = true;
-                item.Value.PositionChanged += Value_PositionChanged;
-            }
-        }
-
-        void Value_PositionChanged(object sender, GraphX.Models.VertexPositionEventArgs args)
-        {
-            var zoomtop = zoomctrl.TranslatePoint(new Point(0, 0), Area);
-            //dg_Area.UpdateLayout();
-            var zoombottom = new Point(Area.ActualWidth, Area.ActualHeight);
-            var pos = args.Position;
-
-            if (pos.X < zoomtop.X) { GraphAreaBase.SetX(args.VertexControl, zoomtop.X, true); }
-            if (pos.Y < zoomtop.Y) { GraphAreaBase.SetY(args.VertexControl, zoomtop.Y, true); }
-
-            if (pos.X > zoombottom.X) { GraphAreaBase.SetX(args.VertexControl, zoombottom.X, true); }
-            if (pos.Y > zoombottom.Y) { GraphAreaBase.SetY(args.VertexControl, zoombottom.Y, true); }
-        }
-
         private void btnExportNav_Click(object sender, RoutedEventArgs e)
         {
             AreaNav.ExportAsPNG();
+        }
+
+        private void settingView_SettingApplied(object sender, SettingAppliedRoutedEventArgs e)
+        {
+            if (e.NeedRefresh)
+            {
+                AreaNav.ClearLayout();
+
+                navTab.Visibility = System.Windows.Visibility.Hidden;
+
+                overrallTab.IsSelected = true;
+
+                GraphDataService = new CsvGraphDataService();
+            }
+
+            ((SettingView)sender).Visibility = System.Windows.Visibility.Collapsed;
+        }
+
+        private void btnSetting_Click(object sender, RoutedEventArgs e)
+        {
+            settingView.Visibility = System.Windows.Visibility.Visible;
+        }
+
+        private void tbtnCanDrag_Click(object sender, RoutedEventArgs e)
+        {
+            UpdateCanDrag(Area, tbtnCanDrag.IsChecked.Value);
+        }
+
+        private void UpdateCanDrag(GraphArea area, bool canDrag)
+        {
+            foreach (var v in area.VertexList)
+            {
+                DragBehaviour.SetIsDragEnabled(v.Value, canDrag);
+            }
+            //throw new NotImplementedException();
         }
     }
 }

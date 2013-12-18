@@ -9,16 +9,13 @@ namespace Orc.GraphExplorer
 {
     public class GraphExplorerSection : ConfigurationSection
     {
-        private static GraphExplorerSection _setting;
-
         public static GraphExplorerSection Current
         {
             get
             {
-                if (_setting==null)
-                    _setting = ConfigurationManager.GetSection("graphExplorer") as GraphExplorerSection;
+                Configuration exeConfiguration = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
 
-                return _setting;
+                return exeConfiguration.GetSection("graphExplorer") as GraphExplorerSection;
             }
         }
 
