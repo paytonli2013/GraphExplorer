@@ -26,7 +26,7 @@ namespace Orc.GraphExplorer
             var eslaParameters = new EfficientSugiyamaLayoutParameters()
             {
                 MinimizeEdgeLength = true,
-                LayerDistance = 100
+                LayerDistance = 80
             };
 
             var esla = new EfficientSugiyamaLayoutAlgorithm<TVertex, TEdge, TGraph>(_graph, eslaParameters,null, VertexSizes);

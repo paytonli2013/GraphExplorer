@@ -20,18 +20,28 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <TabControl HorizontalAlignment="Stretch" Grid.Row="1" VerticalAlignment="Stretch">
-            <TabItem  Name="overrallTab" >
+            <TabItem  Name="overrallTab" Padding="4,1">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="Overrall" VerticalAlignment="Center"/>
-                        <Button Height="22" Width="22" Name="btnRefresh" Style="{StaticResource RefershButtonStyle}" Click="btnRefresh_Click"/>
+                        <Button Margin="8,0,0,0" Height="28" Width="28" Name="btnSave" Style="{StaticResource SaveButtonStyle}" Click="btnSave_Click"/>
+                        <Button Height="28" Width="28" Name="btnLoad" Style="{StaticResource LoadButtonStyle}" Click="btnLoad_Click"/>
+
+                        <Button Height="28" Width="28" Name="btnExport" Style="{StaticResource ExportButtonStyle}" Click="btnExport_Click"/>
+                        <Button Height="28" Width="28" Name="btnRefresh" Style="{StaticResource RefershButtonStyle}" Click="btnRefresh_Click"/>
                     </StackPanel>
                 </TabItem.Header>
-                <zb:Zoombox x:Name="zoomctrl" >
-                    <local:GraphArea x:Name="Area" />
+                <zb:Zoombox x:Name="zoomctrl">
+                    <local:GraphArea x:Name="Area"/>
                 </zb:Zoombox>
             </TabItem>
-            <TabItem Header="Navigate" Name="navTab" Visibility="Hidden">
+            <TabItem Name="navTab" Visibility="Hidden" Padding="4,1">
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Navigate" VerticalAlignment="Center"/>
+                        <Button Margin="6,0,0,0" Height="28" Width="28" Name="btnClose" Style="{StaticResource CloseButtonStyle}" Click="btnClose_Click"/>
+                    </StackPanel>
+                </TabItem.Header>
                 <zb:Zoombox x:Name="zoomctrlNav" >
                     <local:GraphArea x:Name="AreaNav" />
                 </zb:Zoombox>

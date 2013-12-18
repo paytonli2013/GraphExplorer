@@ -18,6 +18,8 @@ using GraphX.GraphSharp.Algorithms.Layout.Simple.FDP;
 using GraphX.GraphSharp.Algorithms.OverlapRemoval;
 using GraphX.GraphSharp.Algorithms.Layout.Simple.Hierarchical;
 using System.Windows.Threading;
+using Microsoft.Win32;
+using GraphX;
 
 namespace Orc.GraphExplorer
 {
@@ -26,10 +28,6 @@ namespace Orc.GraphExplorer
     /// </summary>
     public partial class GraphExplorer : UserControl
     {
-        //IGraphDataService _graphDataService;
-
-        //default constructor, no service be injected
-        bool _isNavAreaInit = false;
 
         Queue<NavigateHistoryItem> _navigateHistory = new Queue<NavigateHistoryItem>();
 
@@ -202,7 +200,6 @@ namespace Orc.GraphExplorer
         void ApplySetting(Zoombox zoom, GraphArea area)
         {
             Zoombox.SetViewFinderVisibility(zoom, System.Windows.Visibility.Visible);
-            zoom.FillToBounds();
 
             //This property sets vertex overlap removal algorithm.
             //Such algorithms help to arrange vertices in the layout so no one overlaps each other.
@@ -367,9 +364,83 @@ namespace Orc.GraphExplorer
                     zoomctrl.CenterContent();
             }
         }
+
+        private void btnClose_Click(object sender, RoutedEventArgs e)
+        {
+            AreaNav.ClearLayout();
+
+            navTab.Visibility = System.Windows.Visibility.Hidden;
+
+            overrallTab.IsSelected = true;
+        }
+
+        private void btnRefresh_Click_1(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void btnSave_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var dlg = new SaveFileDialog() { Filter = "All files|*.xml", Title = "Select layout file name", FileName = "overrall_layout.xml" };
+                if (dlg.ShowDialog() == true)
+                {
+                    //gg_Area.SaveVisual(dlg.FileName);
+                    Area.SaveIntoFile(dlg.FileName);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+
+        }
+
+        private void btnLoad_Click(object sender, RoutedEventArgs e)
+        {
+            var dlg = new OpenFileDialog() { Filter = "All files|*.xml", Title = "Select layout file", FileName = "overrall_layout.xml" };
+            if (dlg.ShowDialog() == true)
+            {
+                try
+                {
+                    Area.LoadFromFile(dlg.FileName);
+                    Area.RelayoutGraph();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(string.Format("Failed to load layout file:\n {0}", ex.ToString()));
+                }
+            }
+        }
+
+        private void btnExport_Click(object sender, RoutedEventArgs e)
+        {
+            Area.ExportAsPNG();
+        }
+
+        private void EnableDrag(GraphArea area)
+        {
+            foreach (var item in area.VertexList)
+            {
+                DragBehaviour.SetIsDragEnabled(item.Value, true);
+                item.Value.EventOptions.PositionChangeNotification = true;
+                item.Value.PositionChanged += Value_PositionChanged;
+            }
+        }
+
+        void Value_PositionChanged(object sender, GraphX.Models.VertexPositionEventArgs args)
+        {
+            var zoomtop = zoomctrl.TranslatePoint(new Point(0, 0), Area);
+            //dg_Area.UpdateLayout();
+            var zoombottom = new Point(Area.ActualWidth, Area.ActualHeight);
+            var pos = args.Position;
+
+            if (pos.X < zoomtop.X) { GraphAreaBase.SetX(args.VertexControl, zoomtop.X, true); }
+            if (pos.Y < zoomtop.Y) { GraphAreaBase.SetY(args.VertexControl, zoomtop.Y, true); }
+
+            if (pos.X > zoombottom.X) { GraphAreaBase.SetX(args.VertexControl, zoombottom.X, true); }
+            if (pos.Y > zoombottom.Y) { GraphAreaBase.SetY(args.VertexControl, zoombottom.Y, true); }
+        }
     }
-
-
-
-
 }
