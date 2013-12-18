@@ -381,6 +381,9 @@ namespace Orc.GraphExplorer
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
+            //select overrall tab
+            overrallTab.IsSelected = true;
+
             try
             {
                 var dlg = new SaveFileDialog() { Filter = "All files|*.xml", Title = "Select layout file name", FileName = "overrall_layout.xml" };
@@ -399,6 +402,9 @@ namespace Orc.GraphExplorer
 
         private void btnLoad_Click(object sender, RoutedEventArgs e)
         {
+            //select overrall tab
+            overrallTab.IsSelected = true;
+
             var dlg = new OpenFileDialog() { Filter = "All files|*.xml", Title = "Select layout file", FileName = "overrall_layout.xml" };
             if (dlg.ShowDialog() == true)
             {
@@ -441,6 +447,11 @@ namespace Orc.GraphExplorer
 
             if (pos.X > zoombottom.X) { GraphAreaBase.SetX(args.VertexControl, zoombottom.X, true); }
             if (pos.Y > zoombottom.Y) { GraphAreaBase.SetY(args.VertexControl, zoombottom.Y, true); }
+        }
+
+        private void btnExportNav_Click(object sender, RoutedEventArgs e)
+        {
+            AreaNav.ExportAsPNG();
         }
     }
 }
