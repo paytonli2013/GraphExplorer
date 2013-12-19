@@ -28,7 +28,7 @@ namespace Orc.GraphExplorer
     /// </summary>
     public partial class GraphExplorer : UserControl
     {
-        private List<VertexControl> _selectedVertices = new List<VertexControl>();
+        private List<int> _selectedVertices = new List<int>();
 
         Queue<NavigateHistoryItem> _navigateHistory = new Queue<NavigateHistoryItem>();
 
@@ -564,15 +564,19 @@ namespace Orc.GraphExplorer
 
         private void SelectVertex(VertexControl vc)
         {
-            if (_selectedVertices.Contains(vc))
+            var v = vc.Vertex as DataVertex;
+            if (v == null)
+                return;
+
+            if (_selectedVertices.Contains(v.Id))
             {
-                _selectedVertices.Remove(vc);
+                _selectedVertices.Remove(v.Id);
                 HighlightBehaviour.SetHighlighted(vc, false);
                 DragBehaviour.SetIsTagged(vc, false);
             }
             else
             {
-                _selectedVertices.Add(vc);
+                _selectedVertices.Add(v.Id);
                 HighlightBehaviour.SetHighlighted(vc, true);
                 DragBehaviour.SetIsTagged(vc, true);
             }
@@ -586,14 +590,16 @@ namespace Orc.GraphExplorer
                 UpdateCanDrag(Area, tbtnCanDrag.IsChecked.Value);
             }
 
-            UpdateHighlightBehaviour();
+            UpdateHighlightBehaviour(true);
         }
 
-        private void UpdateHighlightBehaviour()
+        private void UpdateHighlightBehaviour(bool clearSelectedVertices)
         {
+            if (clearSelectedVertices)
+                _selectedVertices.Clear();
+
             if (tbtnCanEdit.IsChecked.Value)
             {
-                _selectedVertices.Clear();
                 foreach (var v in Area.VertexList)
                 {
                     HighlightBehaviour.SetIsHighlightEnabled(v.Value, false);
@@ -607,7 +613,6 @@ namespace Orc.GraphExplorer
             }
             else
             {
-                _selectedVertices.Clear();
                 foreach (var v in Area.VertexList)
                 {
                     HighlightBehaviour.SetIsHighlightEnabled(v.Value, true);
@@ -656,7 +661,7 @@ namespace Orc.GraphExplorer
                 {
                     CreateEdge(_selectedVertices[0], _selectedVertices[1], Area);
 
-                    zoomctrl.FillToBounds();
+                    FitToBounds(Area.Dispatcher,zoomctrl);
                 }
                 else
                 {
@@ -689,43 +694,62 @@ namespace Orc.GraphExplorer
 
             var vCtrl = new VertexControl(vertex);
 
-            HighlightBehaviour.SetIsHighlightEnabled(vCtrl, false);
-
-            HighlightBehaviour.SetHighlighted(vCtrl, true);
-
-            _selectedVertices.Add(vCtrl);
+            _selectedVertices.Add(vertex.Id);
 
             area.AddVertex(vertex, vCtrl);
 
-            area.RelayoutGraph(true);
+            //area.RelayoutGraph();
+            //area.GenerateAllEdges();
+            //area.ShowAllEdgesLabels();
+            //area.InvalidateVisual();
+            //area.GenerateGraph(area.Graph, true);
+            area.GenerateGraph();
+            area.GenerateAllEdges();
+            area.ShowAllEdgesLabels();
 
-            zoom.FitToBounds();
-            //area.RelayoutFinished += (s, e) => RelayoutFinished(s, e, vCtrl, area, zoom);
+            UpdateHighlightBehaviour(false);
+
+            foreach (var selectedV in _selectedVertices)
+            {
+                var vc = area.VertexList.Where(pair => pair.Key.Id == selectedV).Select(pair=>pair.Value).FirstOrDefault();
+                HighlightBehaviour.SetHighlighted(vc, true);
+            }
+
+            FitToBounds(area.Dispatcher, zoom);
         }
 
-        private void CreateEdge(VertexControl from, VertexControl to, GraphArea area)
+        private void CreateEdge(int fromId,int toId, GraphArea area)
         {
+            VertexControl from = area.VertexList.Where(pair => pair.Key.Id == fromId).Select(pair=>pair.Value).FirstOrDefault();
+            VertexControl to = area.VertexList.Where(pair => pair.Key.Id == toId).Select(pair => pair.Value).FirstOrDefault();
             if (from == null || to == null)
                 return;
 
             var edge = new DataEdge(from.Vertex as DataVertex, to.Vertex as DataVertex);
-            var edgeControl = new EdgeControl(from, to, edge) 
+            var edgeControl = new EdgeControl(from, to, edge)
             {
                 ShowArrows = true,
                 ShowLabel = true
             };
-            
+
             HighlightBehaviour.SetIsHighlightEnabled(edgeControl, false);
             HighlightBehaviour.SetHighlighted(edgeControl, false);
+
             area.Graph.AddEdge(edge);
             area.AddEdge(edge, edgeControl);
-            area.GenerateGraph(area.Graph, true);
+
+            //area.RelayoutGraph();
+            //area.GenerateAllEdges();
+            //area.ShowAllEdgesLabels();
+            //area.InvalidateVisual();
+
+            area.GenerateGraph(true);
+            //area.InvalidateVisual();
             //area.RelayoutGraph();
             HighlightBehaviour.SetHighlighted(from, false);
             HighlightBehaviour.SetHighlighted(to, false);
-            _selectedVertices.Clear();
 
-            UpdateHighlightBehaviour();
+            UpdateHighlightBehaviour(true);
         }
 
         private void SafeRemoveVertex(VertexControl vc, GraphArea area, bool removeFromSelected = false)
@@ -737,10 +761,13 @@ namespace Orc.GraphExplorer
                 area.Graph.RemoveEdge(ec.Edge as DataEdge);
                 area.RemoveEdge(ec.Edge as DataEdge);
             }
-            area.Graph.RemoveVertex(vc.Vertex as DataVertex);
-            area.RemoveVertex(vc.Vertex as DataVertex);
-            if (removeFromSelected && _selectedVertices.Contains(vc))
-                _selectedVertices.Remove(vc);
+
+            var v = vc.Vertex as DataVertex;
+            area.Graph.RemoveVertex(v);
+            area.RemoveVertex(v);
+
+            if (removeFromSelected && v!=null && _selectedVertices.Contains(v.Id))
+                _selectedVertices.Remove(v.Id);
         }
 
         void ShowAlertMessage(string message)
