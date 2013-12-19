@@ -65,14 +65,26 @@
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Margin="8,0,0,0" FontWeight="Bold" Text="Navigate" VerticalAlignment="Center"/>
                         <StackPanel Orientation="Horizontal">
-                            <Button Margin="6,0,0,0"  Height="28" Width="28" Name="btnExportNav" Style="{StaticResource ExportButtonStyle}" Click="btnExportNav_Click"/>
                             <Button Height="28" Width="28" Name="btnClose" Style="{StaticResource CloseButtonStyle}" Click="btnClose_Click"/>
                         </StackPanel>
                     </StackPanel>
                 </TabItem.Header>
-                <zb:Zoombox x:Name="zoomctrlNav" >
-                    <model:GraphArea x:Name="AreaNav" />
-                </zb:Zoombox>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Margin="-1,60,0,0" Background="{StaticResource ScrollViewBackground}" BorderThickness="1" BorderBrush="{StaticResource NormalBorderBrush}">
+                        <StackPanel Orientation="Vertical">
+                            <Button Height="28" Width="28" Name="btnExportNav" Style="{StaticResource ExportButtonStyle}" Click="btnExportNav_Click"/>
+                        </StackPanel>
+                    </Border>
+                    <zb:Zoombox Grid.Column="1" x:Name="zoomctrlNav" >
+                        <model:GraphArea x:Name="AreaNav" />
+                    </zb:Zoombox>
+                </Grid>
+
             </TabItem>
         </TabControl>
 

@@ -637,6 +637,9 @@ namespace Orc.GraphExplorer
                         ShowAlertMessage(error.Message);
                 });
 
+                _selectedVertices.Clear();
+                tbtnCanEdit.IsChecked = false;
+
                 GetEdges();
             }
             catch (Exception ex)
@@ -652,6 +655,8 @@ namespace Orc.GraphExplorer
                 if (_selectedVertices.Count == 2)
                 {
                     CreateEdge(_selectedVertices[0], _selectedVertices[1], Area);
+
+                    zoomctrl.FillToBounds();
                 }
                 else
                 {
@@ -688,8 +693,6 @@ namespace Orc.GraphExplorer
 
             HighlightBehaviour.SetHighlighted(vCtrl, true);
 
-            _selectedVertices.Clear();
-
             _selectedVertices.Add(vCtrl);
 
             area.AddVertex(vertex, vCtrl);
@@ -706,17 +709,23 @@ namespace Orc.GraphExplorer
                 return;
 
             var edge = new DataEdge(from.Vertex as DataVertex, to.Vertex as DataVertex);
-            var edgeControl = new EdgeControl(from, to, edge);
-
+            var edgeControl = new EdgeControl(from, to, edge) 
+            {
+                ShowArrows = true,
+                ShowLabel = true
+            };
+            
             HighlightBehaviour.SetIsHighlightEnabled(edgeControl, false);
             HighlightBehaviour.SetHighlighted(edgeControl, false);
             area.Graph.AddEdge(edge);
             area.AddEdge(edge, edgeControl);
-            area.RelayoutGraph(true);
-
+            area.GenerateGraph(area.Graph, true);
+            //area.RelayoutGraph();
             HighlightBehaviour.SetHighlighted(from, false);
             HighlightBehaviour.SetHighlighted(to, false);
             _selectedVertices.Clear();
+
+            UpdateHighlightBehaviour();
         }
 
         private void SafeRemoveVertex(VertexControl vc, GraphArea area, bool removeFromSelected = false)
