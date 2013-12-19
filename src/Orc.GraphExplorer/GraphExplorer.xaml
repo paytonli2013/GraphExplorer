@@ -7,12 +7,14 @@
              xmlns:zb="clr-namespace:GraphX.Xceed.Wpf.Toolkit.Zoombox;assembly=GraphX"
              xmlns:model="clr-namespace:Orc.GraphExplorer.Model"  
              xmlns:local="clr-namespace:Orc.GraphExplorer" 
+             xmlns:converter="clr-namespace:Orc.GraphExplorer.Converter"
              d:DesignHeight="300" d:DesignWidth="300">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Assets/ThemedGraphXTemplates.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <converter:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid Name="root">
@@ -20,25 +22,48 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <TabControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-            <TabItem  Name="overrallTab" Padding="4,1">
-                <TabItem.Header>
+            <TabItem  Name="overrallTab" Header="Overrall" FontWeight="Bold">
+                <!--<TabItem.Header>
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock FontWeight="Bold" Text="Overrall" VerticalAlignment="Center"/>
-                        <Button Margin="8,0,0,0" ToolTip="Save Layout To File"  Height="28" Width="28" Name="btnSave" Style="{StaticResource SaveButtonStyle}" Click="btnSave_Click"/>
-                        <Button Height="28" Width="28" ToolTip="Load Layout From File"  Name="btnLoad" Style="{StaticResource LoadButtonStyle}" Click="btnLoad_Click"/>
-                        <Button Height="28" Width="28" ToolTip="Save As Image" Name="btnExport" Style="{StaticResource ExportButtonStyle}" Click="btnExport_Click"/>
-                        <ToggleButton Style="{StaticResource DragToggleButtonStyle}" Height="28" Width="28" ToolTip="Enable Drag" Name="tbtnCanDrag" Click="tbtnCanDrag_Click"/>
-                        <Button Height="28" Content="Refresh" ToolTip="Refresh Graph" Width="28" Name="btnRefresh" Style="{StaticResource RefershButtonStyle}" Click="btnRefresh_Click"/>
+                        <TextBlock Margin="8,0,0,0" FontWeight="Bold" Text="Overrall" VerticalAlignment="Center"/>
                     </StackPanel>
-                </TabItem.Header>
-                <zb:Zoombox x:Name="zoomctrl">
-                    <model:GraphArea x:Name="Area"/>
-                </zb:Zoombox>
+                </TabItem.Header>-->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Margin="-1,60,0,0" Background="{StaticResource ScrollViewBackground}" BorderThickness="1" BorderBrush="{StaticResource NormalBorderBrush}">
+                        <StackPanel Orientation="Vertical">
+                            <Button ToolTip="Save Layout To Xml"  Height="28" Width="28" Name="btnSave" Style="{StaticResource SaveButtonStyle}" Click="btnSave_Click"/>
+                            <Button Height="28" Width="28" ToolTip="Load Layout From Xml"  Name="btnLoad" Style="{StaticResource LoadButtonStyle}" Click="btnLoad_Click"/>
+                            <Button Height="28" Width="28" ToolTip="Save As Image" Name="btnExport" Style="{StaticResource ExportButtonStyle}" Click="btnExport_Click"/>
+
+                            <Rectangle Fill="{StaticResource NormalBorderBrush}" Height="1" HorizontalAlignment="Stretch" Margin="4"/>
+                            <ToggleButton Style="{StaticResource DragToggleButtonStyle}" Height="28" Width="28" ToolTip="Enable Drag" Name="tbtnCanDrag" Click="tbtnCanDrag_Click"/>
+                            <ToggleButton Style="{StaticResource EditToggleButtonStyle}" Height="28" Width="28" ToolTip="Enable Edit Mode" Name="tbtnCanEdit" Click="tbtnCanEdit_Click"/>
+                            <StackPanel Name="editPanel" Visibility="{Binding IsChecked,ElementName=tbtnCanEdit,Converter={StaticResource BoolToVisibilityConverter}}">
+                                <Button Height="28" ToolTip="Create Link" Name="tbnNewEdge" Click="tbnNewEdge_Click" Width="28" Style="{StaticResource EdgeButtonStyle}"/>
+                                <Button Height="28" ToolTip="Create Node" Name="tbnNewNode" Click="tbnNewNode_Click"  Width="28" Style="{StaticResource VertexButtonStyle}"/>
+                                <Button Height="28" ToolTip="Save Changes To Data Source" Name="tbnSaveChanges" Click="tbnSaveChanges_Click" Width="28" Style="{StaticResource SaveButtonStyle}"/>
+                            </StackPanel>
+                            <Rectangle Fill="{StaticResource NormalBorderBrush}" Height="1" HorizontalAlignment="Stretch" Margin="4"/>
+                            <Button Height="28" Content="Refresh" ToolTip="Refresh Graph" Width="28" Name="btnRefresh" Style="{StaticResource RefershButtonStyle}" Click="btnRefresh_Click"/>
+                        </StackPanel>
+                    </Border>
+
+
+                    <zb:Zoombox Grid.Column="1" x:Name="zoomctrl">
+                        <model:GraphArea x:Name="Area"/>
+                    </zb:Zoombox>
+                </Grid>
+
             </TabItem>
-            <TabItem Name="navTab" Visibility="Hidden" Padding="4,1">
+            <TabItem Name="navTab" Visibility="Hidden" Padding="1">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock FontWeight="Bold" Text="Navigate" VerticalAlignment="Center"/>
+                        <TextBlock Margin="8,0,0,0" FontWeight="Bold" Text="Navigate" VerticalAlignment="Center"/>
                         <StackPanel Orientation="Horizontal">
                             <Button Margin="6,0,0,0"  Height="28" Width="28" Name="btnExportNav" Style="{StaticResource ExportButtonStyle}" Click="btnExportNav_Click"/>
                             <Button Height="28" Width="28" Name="btnClose" Style="{StaticResource CloseButtonStyle}" Click="btnClose_Click"/>

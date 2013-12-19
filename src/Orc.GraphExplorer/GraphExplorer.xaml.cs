@@ -28,9 +28,7 @@ namespace Orc.GraphExplorer
     /// </summary>
     public partial class GraphExplorer : UserControl
     {
-        bool _canDrag;
-
-        bool _canDragNav;
+        private List<VertexControl> _selectedVertices = new List<VertexControl>();
 
         Queue<NavigateHistoryItem> _navigateHistory = new Queue<NavigateHistoryItem>();
 
@@ -45,6 +43,7 @@ namespace Orc.GraphExplorer
 
             Area.VertexDoubleClick += Area_VertexDoubleClick;
             AreaNav.VertexDoubleClick += AreaNav_VertexDoubleClick;
+            Area.VertexSelected += Area_VertexSelected;
 
             this.Loaded += (s, e) =>
             {
@@ -61,6 +60,23 @@ namespace Orc.GraphExplorer
                         break;
                 }
             };
+        }
+
+        void Area_VertexSelected(object sender, GraphX.Models.VertexSelectedEventArgs args)
+        {
+            if (args.MouseArgs.LeftButton == MouseButtonState.Pressed)
+            {
+                if (DragBehaviour.GetIsDragging(args.VertexControl)) return;
+
+                SelectVertex(args.VertexControl);
+            }
+            else if (args.MouseArgs.RightButton == MouseButtonState.Pressed)
+            {
+                args.VertexControl.ContextMenu = new System.Windows.Controls.ContextMenu();
+                var mi = new System.Windows.Controls.MenuItem() { Header = "Delete item", Tag = args.VertexControl };
+                //mi.Click += mi_Click;
+                args.VertexControl.ContextMenu.Items.Add(mi);
+            }
         }
 
         //another constructor for inject IGraphDataService to graph explorer
@@ -95,6 +111,11 @@ namespace Orc.GraphExplorer
 
         void Area_VertexDoubleClick(object sender, GraphX.Models.VertexSelectedEventArgs args)
         {
+            if (tbtnCanEdit.IsChecked.HasValue && tbtnCanEdit.IsChecked.Value)
+            {
+                return;
+            }
+
             var vertex = args.VertexControl.DataContext as DataVertex;
 
             if (vertex == null)
@@ -138,17 +159,22 @@ namespace Orc.GraphExplorer
 
             var dispatcher = AreaNav.Dispatcher;
 
+            FitToBounds(dispatcher, zoomctrl);
+        }
+
+        private void FitToBounds(System.Windows.Threading.Dispatcher dispatcher, Zoombox zoom)
+        {
             if (dispatcher != null)
             {
                 dispatcher.BeginInvoke(new Action(()
                     =>
-                    {
-                        zoomctrlNav.FitToBounds();
-                    }), DispatcherPriority.Background);
+                {
+                    zoom.FitToBounds();
+                }), DispatcherPriority.Background);
             }
             else
             {
-                zoomctrlNav.FitToBounds();
+                zoom.FitToBounds();
             }
         }
 
@@ -220,13 +246,17 @@ namespace Orc.GraphExplorer
             //will run async with the UI thread. Completion of the specified methods can be catched by corresponding events:
             //Area.RelayoutFinished and Area.GenerateGraphFinished.
             area.AsyncAlgorithmCompute = true;
+
+            //show edage label
+            area.ShowAllEdgesLabels(true);
         }
 
         void OnVertexesLoaded(IEnumerable<DataVertex> vertexes)
         {
             Vertexes = new List<DataVertex>(vertexes);
             UpdateGraphArea();
-            zoomctrl.FitToBounds();
+
+            FitToBounds(Area.Dispatcher, zoomctrl);
         }
 
         void OnEdgeLoaded(IEnumerable<DataEdge> edges)
@@ -339,7 +369,24 @@ namespace Orc.GraphExplorer
 
         private void btnRefresh_Click(object sender, RoutedEventArgs e)
         {
-            InnerRefreshGraph();
+            if (tbtnCanEdit.IsChecked.HasValue && tbtnCanEdit.IsChecked.Value)
+            {
+                if (MessageBox.Show("Refresh view in edit mode will discard changes you made, will you want to continue?",
+                 "Confirmation", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                {
+                    tbtnCanEdit.IsChecked = false;
+                    InnerRefreshGraph();
+                }
+                else
+                {
+                    // Do nothing
+                }
+            }
+            else
+            {
+                InnerRefreshGraph();
+            }
+
         }
 
         private void InnerRefreshGraph()
@@ -350,29 +397,10 @@ namespace Orc.GraphExplorer
 
             int vCount = Vertexes.Count();
 
-            if (dispatcher != null)
-            {
-                dispatcher.BeginInvoke(new Action(()
-                    =>
-                {
-                    UpdateGraphArea();
+            UpdateGraphArea();
 
-                    if (vCount > 2)
-                        zoomctrl.FitToBounds();
-                    else
-                        zoomctrl.CenterContent();
-
-                }), DispatcherPriority.Normal);
-            }
-            else
-            {
-                UpdateGraphArea();
-
-                if (vCount > 2)
-                    zoomctrl.FitToBounds();
-                else
-                    zoomctrl.CenterContent();
-            }
+            if (vCount > 2)
+                FitToBounds(Area.Dispatcher, zoomctrl);
         }
 
         private void btnClose_Click(object sender, RoutedEventArgs e)
@@ -473,6 +501,165 @@ namespace Orc.GraphExplorer
                 DragBehaviour.SetIsDragEnabled(v.Value, canDrag);
             }
             //throw new NotImplementedException();
+        }
+
+        private void SelectVertex(VertexControl vc)
+        {
+            if (_selectedVertices.Contains(vc))
+            {
+                _selectedVertices.Remove(vc);
+                HighlightBehaviour.SetHighlighted(vc, false);
+                DragBehaviour.SetIsTagged(vc, false);
+            }
+            else
+            {
+                _selectedVertices.Add(vc);
+                HighlightBehaviour.SetHighlighted(vc, true);
+                DragBehaviour.SetIsTagged(vc, true);
+            }
+        }
+
+        private void tbtnCanEdit_Click(object sender, RoutedEventArgs e)
+        {
+            if (tbtnCanDrag.IsChecked.HasValue && tbtnCanDrag.IsChecked.Value)
+            {
+                tbtnCanDrag.IsChecked = false;
+                UpdateCanDrag(Area, tbtnCanDrag.IsChecked.Value);
+            }
+
+            UpdateHighlightBehaviour();
+        }
+
+        private void UpdateHighlightBehaviour()
+        {
+            if (tbtnCanEdit.IsChecked.Value)
+            {
+                _selectedVertices.Clear();
+                foreach (var v in Area.VertexList)
+                {
+                    HighlightBehaviour.SetIsHighlightEnabled(v.Value, false);
+                    HighlightBehaviour.SetHighlighted(v.Value, false);
+                }
+                foreach (var edge in Area.EdgesList)
+                {
+                    HighlightBehaviour.SetIsHighlightEnabled(edge.Value, false);
+                    HighlightBehaviour.SetHighlighted(edge.Value, false);
+                }
+            }
+            else
+            {
+                _selectedVertices.Clear();
+                foreach (var v in Area.VertexList)
+                {
+                    HighlightBehaviour.SetIsHighlightEnabled(v.Value, true);
+                    HighlightBehaviour.SetHighlighted(v.Value, false);
+                }
+                foreach (var edge in Area.EdgesList)
+                {
+                    HighlightBehaviour.SetIsHighlightEnabled(edge.Value, true);
+                    HighlightBehaviour.SetHighlighted(edge.Value, false);
+                }
+            }
+        }
+
+        private void tbnSaveChanges_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void tbnNewEdge_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (_selectedVertices.Count == 2)
+                {
+                    CreateEdge(_selectedVertices[0], _selectedVertices[1], Area);
+                }
+                else
+                {
+                    ShowAlertMessage("plase select 2 and only 2 nodes before create a relationship");
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowAlertMessage(ex.Message);
+            }
+        }
+
+        private void tbnNewNode_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                CreateVertex(Area, zoomctrl);
+            }
+            catch (Exception ex)
+            {
+                ShowAlertMessage(ex.Message);
+            }
+        }
+
+        private void CreateVertex(GraphArea area, Zoombox zoom)
+        {
+            var vertex = DataVertex.Create();
+
+            Area.Graph.AddVertex(vertex);
+
+            var vCtrl = new VertexControl(vertex);
+
+            HighlightBehaviour.SetIsHighlightEnabled(vCtrl, false);
+
+            HighlightBehaviour.SetHighlighted(vCtrl, true);
+
+            _selectedVertices.Clear();
+
+            _selectedVertices.Add(vCtrl);
+
+            area.AddVertex(vertex, vCtrl);
+
+            area.RelayoutGraph(true);
+
+            zoom.FitToBounds();
+            //area.RelayoutFinished += (s, e) => RelayoutFinished(s, e, vCtrl, area, zoom);
+        }
+
+        private void CreateEdge(VertexControl from, VertexControl to, GraphArea area)
+        {
+            if (from == null || to == null)
+                return;
+
+            var edge = new DataEdge(from.Vertex as DataVertex, to.Vertex as DataVertex);
+            var edgeControl = new EdgeControl(from, to, edge);
+
+            HighlightBehaviour.SetIsHighlightEnabled(edgeControl, false);
+            HighlightBehaviour.SetHighlighted(edgeControl, false);
+            area.Graph.AddEdge(edge);
+            area.AddEdge(edge, edgeControl);
+            area.RelayoutGraph(true);
+
+            HighlightBehaviour.SetHighlighted(from, false);
+            HighlightBehaviour.SetHighlighted(to, false);
+            _selectedVertices.Clear();
+        }
+
+        private void SafeRemoveVertex(VertexControl vc, GraphArea area, bool removeFromSelected = false)
+        {
+            //remove all adjacent edges
+            foreach (var item in area.GetRelatedControls(vc, GraphControlType.Edge, EdgesType.All))
+            {
+                var ec = item as EdgeControl;
+                area.Graph.RemoveEdge(ec.Edge as DataEdge);
+                area.RemoveEdge(ec.Edge as DataEdge);
+            }
+            area.Graph.RemoveVertex(vc.Vertex as DataVertex);
+            area.RemoveVertex(vc.Vertex as DataVertex);
+            if (removeFromSelected && _selectedVertices.Contains(vc))
+                _selectedVertices.Remove(vc);
+        }
+
+
+        void ShowAlertMessage(string message)
+        {
+            MessageBox.Show(message);
         }
     }
 }

@@ -12,5 +12,9 @@ namespace Orc.GraphExplorer
         void GetEdges(Action<IEnumerable<DataEdge>> onSuccess, Action<Exception> onFail);
 
         void Clear();
+
+        void UpdateVertexes(IEnumerable<DataVertex> vertexes, Action<bool,Exception> onComplete);
+
+        void UpdateEdges(IEnumerable<DataEdge> vertexes, Action<bool, Exception> onComplete); 
     }
 }

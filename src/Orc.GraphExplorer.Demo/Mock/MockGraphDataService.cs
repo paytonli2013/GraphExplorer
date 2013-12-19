@@ -56,10 +56,19 @@ namespace Orc.GraphExplorer.Demo.Mock
             }
         }
 
-
         public void Clear()
         {
             //throw new NotImplementedException();
+        }
+
+        public void UpdateVertexes(IEnumerable<DataVertex> vertexes, Action<bool, Exception> onComplete)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UpdateEdges(IEnumerable<DataEdge> vertexes, Action<bool, Exception> onComplete)
+        {
+            throw new NotImplementedException();
         }
     }
 }

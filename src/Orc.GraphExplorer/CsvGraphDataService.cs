@@ -194,5 +194,16 @@ namespace Orc.GraphExplorer
         {
             vCache.Clear();
         }
+
+
+        public void UpdateVertexes(IEnumerable<DataVertex> vertexes, Action<bool, Exception> onComplete)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UpdateEdges(IEnumerable<DataEdge> vertexes, Action<bool, Exception> onComplete)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

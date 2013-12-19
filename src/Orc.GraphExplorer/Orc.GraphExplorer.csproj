@@ -85,6 +85,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Converter\BoolToVisibilityConverter.cs" />
     <Compile Include="CsvGraphDataService.cs" />
     <Compile Include="CsvGraphDataServiceConfig.cs" />
     <Compile Include="DataLoadedEventArgs.cs" />
@@ -135,6 +136,18 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Assets\appbar.cursor.hand.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\appbar.add.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\appbar.vector.line.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\appbar.vector.line.curve.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\appbar.vector.rectangle.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

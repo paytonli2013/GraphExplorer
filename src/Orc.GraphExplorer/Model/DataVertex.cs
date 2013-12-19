@@ -12,6 +12,15 @@ namespace Orc.GraphExplorer
 {
     public class DataVertex: VertexBase
     {
+        private static int _totalCount = 0;
+
+        public static int TotalCount
+        {
+            get { return DataVertex._totalCount; }
+        }
+
+        private static int _maxId;
+
         public string Title { get; set; }
         public int Id { get; set; }
 
@@ -49,6 +58,14 @@ namespace Orc.GraphExplorer
             base.ID = id;
             Id = id;
             Title = (title==string.Empty)?id.ToString():title;
+
+            _totalCount++;
+            _maxId = id > _maxId ? id : _maxId;
+        }
+
+        public static DataVertex Create()
+        {
+            return new DataVertex(++_maxId);
         }
     }
 }
