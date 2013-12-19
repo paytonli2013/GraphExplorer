@@ -34,6 +34,11 @@ namespace Orc.GraphExplorer
 
         DataVertex _currentNavItem;
 
+        public bool IsInEditMode
+        {
+            get { return tbtnCanEdit.IsChecked.HasValue && tbtnCanEdit.IsChecked.Value; }
+        }
+
         public GraphExplorer()
         {
             InitializeComponent();
@@ -43,7 +48,9 @@ namespace Orc.GraphExplorer
 
             Area.VertexDoubleClick += Area_VertexDoubleClick;
             AreaNav.VertexDoubleClick += AreaNav_VertexDoubleClick;
+
             Area.VertexSelected += Area_VertexSelected;
+            Area.EdgeSelected += Area_EdgeSelected;
 
             AreaNav.GenerateGraphFinished += Area_RelayoutFinished;
             Area.GenerateGraphFinished += Area_RelayoutFinished;
@@ -65,15 +72,43 @@ namespace Orc.GraphExplorer
             };
         }
 
+
+
         void Area_RelayoutFinished(object sender, EventArgs e)
         {
-            ShowAllEdgesLabels(sender as GraphArea,true);
+            ShowAllEdgesLabels(sender as GraphArea, true);
         }
 
-        private void ShowAllEdgesLabels(GraphArea area,bool show)
+        private void ShowAllEdgesLabels(GraphArea area, bool show)
         {
             area.ShowAllEdgesLabels(show);
             area.InvalidateVisual();
+        }
+
+        private void Area_EdgeSelected(object sender, GraphX.Models.EdgeSelectedEventArgs args)
+        {
+            if (IsInEditMode)
+            {
+                args.EdgeControl.ContextMenu = new System.Windows.Controls.ContextMenu();
+                var miDeleteLink = new System.Windows.Controls.MenuItem() { Header = "Delete Link", Tag = args.EdgeControl };
+                miDeleteLink.Click += miDeleteLink_Click;
+                args.EdgeControl.ContextMenu.Items.Add(miDeleteLink);
+            }
+        }
+
+        void miDeleteLink_Click(object sender, RoutedEventArgs e)
+        {
+            var ec = (sender as System.Windows.Controls.MenuItem).Tag as EdgeControl;
+            if (ec != null)
+            {
+                var edge = ec.Edge as DataEdge;
+                if (edge != null)
+                {
+                    Area.Graph.RemoveEdge(edge);
+                    Area.RemoveEdge(edge);
+                }
+            }
+            //throw new NotImplementedException();
         }
 
         void Area_VertexSelected(object sender, GraphX.Models.VertexSelectedEventArgs args)
@@ -84,13 +119,19 @@ namespace Orc.GraphExplorer
 
                 SelectVertex(args.VertexControl);
             }
-            else if (args.MouseArgs.RightButton == MouseButtonState.Pressed)
+            else if (args.MouseArgs.RightButton == MouseButtonState.Pressed && IsInEditMode)
             {
                 args.VertexControl.ContextMenu = new System.Windows.Controls.ContextMenu();
-                var mi = new System.Windows.Controls.MenuItem() { Header = "Delete item", Tag = args.VertexControl };
-                //mi.Click += mi_Click;
-                args.VertexControl.ContextMenu.Items.Add(mi);
+                var miDeleteVertex = new System.Windows.Controls.MenuItem() { Header = "Delete", Tag = args.VertexControl };
+                miDeleteVertex.Click += miDeleteVertex_Click;
+                args.VertexControl.ContextMenu.Items.Add(miDeleteVertex);
             }
+        }
+
+        void miDeleteVertex_Click(object sender, RoutedEventArgs e)
+        {
+            var vc = (sender as System.Windows.Controls.MenuItem).Tag as VertexControl;
+            if (vc != null) SafeRemoveVertex(vc, Area, true);
         }
 
         //another constructor for inject IGraphDataService to graph explorer
@@ -582,7 +623,26 @@ namespace Orc.GraphExplorer
 
         private void tbnSaveChanges_Click(object sender, RoutedEventArgs e)
         {
+            try
+            {
+                GraphDataService.UpdateEdges(Area.Graph.Edges, (result, error) =>
+                {
+                    if (!result && error != null)
+                        ShowAlertMessage(error.Message);
+                });
 
+                GraphDataService.UpdateVertexes(Area.Graph.Vertices, (result, error) =>
+                {
+                    if (!result && error != null)
+                        ShowAlertMessage(error.Message);
+                });
+
+                GetEdges();
+            }
+            catch (Exception ex)
+            {
+                ShowAlertMessage(ex.Message); ;
+            }
         }
 
         private void tbnNewEdge_Click(object sender, RoutedEventArgs e)
@@ -673,7 +733,6 @@ namespace Orc.GraphExplorer
             if (removeFromSelected && _selectedVertices.Contains(vc))
                 _selectedVertices.Remove(vc);
         }
-
 
         void ShowAlertMessage(string message)
         {

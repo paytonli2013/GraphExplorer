@@ -55,11 +55,11 @@ namespace Orc.GraphExplorer
         {
             try
             {
-                if (vCache==null)
+                if (vCache == null)
                     InnerGetVertxes();
 
                 if (onSuccess != null)
-                    onSuccess.Invoke(vCache.Select(i=>i.Value));
+                    onSuccess.Invoke(vCache.Select(i => i.Value));
             }
             catch (Exception error)
             {
@@ -72,10 +72,7 @@ namespace Orc.GraphExplorer
         //     get vertexes data by mapping and grouping from csv file and generate cache
         private void InnerGetVertxes()
         {
-            var vertexesPath = _config.VertexesFilePath;
-
-            if (!File.Exists(vertexesPath))
-                throw new Exception("Vertexes data file not found");
+            var vertexesPath = ExamVertexesFilePath();
 
             using (var fs = new FileStream(vertexesPath, FileMode.Open))
             using (var reader = new CsvReader(new StreamReader(fs)))
@@ -88,9 +85,18 @@ namespace Orc.GraphExplorer
             vCache = MergeVertexesCache(vlist, new Dictionary<int, DataVertex>());
         }
 
+        private string ExamVertexesFilePath()
+        {
+            var vertexesPath = _config.VertexesFilePath;
+
+            if (!File.Exists(vertexesPath))
+                throw new Exception("Vertexes data file not found");
+            return vertexesPath;
+        }
+
         // Summary:
         //   keep & maintain a dictionary for caching DataVertex in case edges creation
-        private static Dictionary<int, DataVertex> MergeVertexesCache(List<DataVertex> vlist,Dictionary<int, DataVertex> cache)
+        private static Dictionary<int, DataVertex> MergeVertexesCache(IEnumerable<DataVertex> vlist, Dictionary<int, DataVertex> cache)
         {
             foreach (var item in vlist)
             {
@@ -144,10 +150,7 @@ namespace Orc.GraphExplorer
                 if (vlist == null)
                     InnerGetVertxes();
 
-                var edgesFilePath = _config.EdgesFilePath;
-
-                if (!File.Exists(edgesFilePath))
-                    throw new Exception("Edges data file not found");
+                var edgesFilePath = ExamEdgeFilePath();
 
                 using (var fs = new FileStream(edgesFilePath, FileMode.Open))
                 using (var reader = new CsvReader(new StreamReader(fs)))
@@ -189,21 +192,120 @@ namespace Orc.GraphExplorer
             }
         }
 
+        private string ExamEdgeFilePath()
+        {
 
+            var edgesFilePath = _config.EdgesFilePath;
+
+            if (!File.Exists(edgesFilePath))
+                throw new Exception("Edges data file not found");
+            return edgesFilePath;
+        }
+
+        // Summary:
+        //     clear vertex cache
         public void Clear()
         {
             vCache.Clear();
         }
 
-
+        // Summary:
+        //     update source
+        //
+        // Parameters:
+        //   vertexes:
+        //     vertexes to be updated to source file
+        //   onComplete:
+        //     callback function which will be invoked when update is complete
         public void UpdateVertexes(IEnumerable<DataVertex> vertexes, Action<bool, Exception> onComplete)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var path = ExamVertexesFilePath();
+
+                using (var fs = new FileStream(path, FileMode.Truncate))
+                using (var writer = new CsvWriter(new StreamWriter(fs)))
+                {
+                    writer.WriteField("ID");
+                    writer.WriteField("Property");
+                    writer.WriteField("Value");
+                    writer.NextRecord();
+
+                    foreach (var v in vertexes)
+                    {
+                        var id = v.Id;
+
+                        if (v.Properties != null)
+                        {
+                            foreach (var p in v.Properties)
+                            {
+                                writer.WriteField(id.ToString());
+                                writer.WriteField(p.Key);
+                                writer.WriteField(p.Value);
+                                writer.NextRecord();
+                            }
+                        }
+                    }
+                }
+
+                vCache = MergeVertexesCache(vertexes, new Dictionary<int, DataVertex>());
+
+                if (onComplete != null)
+                {
+                    onComplete.Invoke(true, null);
+                }
+            }
+            catch (Exception ex)
+            {
+                if (onComplete != null)
+                {
+                    onComplete.Invoke(false, new Exception("error occured during update vertexes", ex));
+                }
+            }
+
         }
 
-        public void UpdateEdges(IEnumerable<DataEdge> vertexes, Action<bool, Exception> onComplete)
+        // Summary:
+        //     update edges to csv file
+        //
+        // Parameters:
+        //   edges:
+        //     edges to be updated to source file
+        //   onComplete:
+        //     callback function which will be invoked when update is complete
+        public void UpdateEdges(IEnumerable<DataEdge> edges, Action<bool, Exception> onComplete)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var path = ExamEdgeFilePath();
+
+                using (var fs = new FileStream(path, FileMode.Truncate))
+                using (var writer = new CsvWriter(new StreamWriter(fs)))
+                {
+                    writer.WriteField("From");
+                    writer.WriteField("To");
+                    writer.NextRecord();
+
+                    foreach (var v in edges)
+                    {
+                        writer.WriteField(v.Source.Id);
+                        writer.WriteField(v.Target.Id);
+                        writer.NextRecord();
+                    }
+                }
+
+                if (onComplete != null)
+                {
+                    onComplete.Invoke(true, null);
+                }
+            }
+            catch (Exception ex)
+            {
+                if (onComplete != null)
+                {
+                    onComplete.Invoke(false, new Exception("error occured during update edges", ex));
+                }
+            }
         }
     }
 }
