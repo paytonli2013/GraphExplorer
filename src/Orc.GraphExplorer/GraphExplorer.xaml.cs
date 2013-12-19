@@ -45,6 +45,9 @@ namespace Orc.GraphExplorer
             AreaNav.VertexDoubleClick += AreaNav_VertexDoubleClick;
             Area.VertexSelected += Area_VertexSelected;
 
+            AreaNav.GenerateGraphFinished += Area_RelayoutFinished;
+            Area.GenerateGraphFinished += Area_RelayoutFinished;
+
             this.Loaded += (s, e) =>
             {
                 var defaultSvc = GraphExplorerSection.Current.DefaultGraphDataService;
@@ -60,6 +63,17 @@ namespace Orc.GraphExplorer
                         break;
                 }
             };
+        }
+
+        void Area_RelayoutFinished(object sender, EventArgs e)
+        {
+            ShowAllEdgesLabels(sender as GraphArea,true);
+        }
+
+        private void ShowAllEdgesLabels(GraphArea area,bool show)
+        {
+            area.ShowAllEdgesLabels(show);
+            area.InvalidateVisual();
         }
 
         void Area_VertexSelected(object sender, GraphX.Models.VertexSelectedEventArgs args)
@@ -159,7 +173,7 @@ namespace Orc.GraphExplorer
 
             var dispatcher = AreaNav.Dispatcher;
 
-            FitToBounds(dispatcher, zoomctrl);
+            FitToBounds(dispatcher, zoomctrlNav);
         }
 
         private void FitToBounds(System.Windows.Threading.Dispatcher dispatcher, Zoombox zoom)
@@ -247,14 +261,13 @@ namespace Orc.GraphExplorer
             //Area.RelayoutFinished and Area.GenerateGraphFinished.
             area.AsyncAlgorithmCompute = true;
 
-            //show edage label
-            area.ShowAllEdgesLabels(true);
         }
 
         void OnVertexesLoaded(IEnumerable<DataVertex> vertexes)
         {
             Vertexes = new List<DataVertex>(vertexes);
-            UpdateGraphArea();
+
+            CreateGraphArea(Area, Vertexes, Edges);
 
             FitToBounds(Area.Dispatcher, zoomctrl);
         }
@@ -265,24 +278,29 @@ namespace Orc.GraphExplorer
             GraphDataService.GetVertexes(OnVertexesLoaded, OnError);
         }
 
-        private void UpdateGraphArea()
+        private void CreateGraphArea(GraphArea area, IEnumerable<DataVertex> vertexes, IEnumerable<DataEdge> edges)
         {
-            Area.ClearLayout();
+            area.ClearLayout();
 
             var graph = new Graph();
-            foreach (var vertex in Vertexes)
+            foreach (var vertex in vertexes)
             {
                 graph.AddVertex(vertex);
             }
 
-            foreach (var edge in Edges)
+            foreach (var edge in edges)
             {
                 graph.AddEdge(edge);
             }
 
-            Area.ExternalLayoutAlgorithm = new TopologicalLayoutAlgorithm<DataVertex, DataEdge, QuickGraph.BidirectionalGraph<DataVertex, DataEdge>>(graph);
+            area.ExternalLayoutAlgorithm = new TopologicalLayoutAlgorithm<DataVertex, DataEdge, QuickGraph.BidirectionalGraph<DataVertex, DataEdge>>(graph);
 
-            Area.GenerateGraph(graph, true, true);
+
+            area.GenerateGraph(graph, true, true);
+
+            //area.ShowAllEdgesLabels(true);
+            //show edage label
+            //area.InvalidateVisual();
         }
 
         void OnError(Exception ex)
@@ -397,7 +415,7 @@ namespace Orc.GraphExplorer
 
             int vCount = Vertexes.Count();
 
-            UpdateGraphArea();
+            CreateGraphArea(Area, Vertexes, Edges);
 
             if (vCount > 2)
                 FitToBounds(Area.Dispatcher, zoomctrl);

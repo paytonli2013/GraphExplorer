@@ -863,11 +863,24 @@
                 <Setter Property="BorderThickness" Value="1"/>
             </Trigger>
         </Style.Triggers>
-
+    </Style>
+    
+    <!--EDGE LABLE CONTROL -->
+    <Style x:Key="EdgeLabelControlStyle" TargetType="{x:Type gxl:EdgeLabelControl}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type gxl:EdgeLabelControl}">
+                    <Grid>
+                        <Border BorderBrush="Black" BorderThickness="1" Background="Gold" CornerRadius="8">
+                            <ContentPresenter Margin="5"/>
+                        </Border>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
-
-    <!--                           StrokeDashArray="{Binding Path=Edge, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource dconv}}" -->
+    <!--        Content="{Binding Edge.Tag, RelativeSource={RelativeSource TemplatedParent}}"                    StrokeDashArray="{Binding Path=Edge, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource dconv}}" -->
     <!-- EDGE CONTROL -->
     <Style TargetType="{x:Type gxl:EdgeControl}">
         <Setter Property="Template">
@@ -881,6 +894,7 @@
                         <Path Stroke="{TemplateBinding Foreground}"
                           StrokeThickness="2" MinWidth="1" MinHeight="1" 
                             x:Name="PART_edgeArrowPath"/>
+                        <gxl:EdgeLabelControl Style="{StaticResource EdgeLabelControlStyle}" x:Name="PART_edgeLabel" />
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>
@@ -913,7 +927,6 @@
                 Value="VertexAndEdge" />
         <Setter Property="gxl:HighlightBehaviour.HighlightEdges" 
                 Value="All"/>
-
         <Style.Triggers>
             <Trigger Property="gxl:HighlightBehaviour.Highlighted" Value="True">
                 <Setter Property="Foreground" Value="Gold"/>
@@ -921,5 +934,6 @@
             </Trigger>
         </Style.Triggers>
     </Style>
-
+    
+  
 </ResourceDictionary>

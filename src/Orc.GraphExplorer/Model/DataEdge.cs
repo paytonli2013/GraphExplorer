@@ -27,6 +27,7 @@ namespace Orc.GraphExplorer
         /// </summary>
         public string Text { get; set; }
         public string ToolTipText {get; set; }
+        public object Tag { get; set; }
 
         public override string ToString()
         {
