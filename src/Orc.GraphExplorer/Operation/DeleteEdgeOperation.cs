@@ -9,10 +9,11 @@ namespace Orc.GraphExplorer
 {
     public class DeleteEdgeOperation : EdgeOperation
     {
-        public DeleteEdgeOperation(GraphArea graph, DataVertex source, DataVertex target, Action<EdgeControl> callback = null, Action<EdgeControl> undoCallback = null)
+        DataEdge _edge;
+        public DeleteEdgeOperation(GraphArea graph, DataVertex source, DataVertex target,DataEdge edge, Action<EdgeControl> callback = null, Action<EdgeControl> undoCallback = null)
             : base(graph, source, target, callback, undoCallback)
         {
-
+            _Edge = edge;
         }
 
         public override void Do()

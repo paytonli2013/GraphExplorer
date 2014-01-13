@@ -107,7 +107,7 @@ namespace Orc.GraphExplorer
             {
                 var edge = eCtrl.Edge as DataEdge;
 
-                var op = new DeleteEdgeOperation(Area, edge.Source, edge.Target, (ec) => 
+                var op = new DeleteEdgeOperation(Area, edge.Source, edge.Target, edge, (ec) => 
                 {
                     //do nothing
                 },
