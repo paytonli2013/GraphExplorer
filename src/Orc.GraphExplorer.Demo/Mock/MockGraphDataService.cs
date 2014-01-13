@@ -71,10 +71,9 @@ namespace Orc.GraphExplorer.Demo.Mock
             throw new NotImplementedException();
         }
 
-
         public void UpdateVertex(DataVertex vertex, Action<bool, DataVertex, Exception> onComplete)
         {
-            throw new NotImplementedException();
+
         }
     }
 }

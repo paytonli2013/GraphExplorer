@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 
@@ -115,9 +116,9 @@ namespace Orc.GraphExplorer.Tests
             var service = new CsvGraphDataService();
             bool callSuccess = false;
             Exception er;
-            List<DataVertex> list = new List<DataVertex>();
+            ObservableCollection<DataVertex> list = new ObservableCollection<DataVertex>();
             var item1 = new DataVertex(1);
-            var listV = new List<Model.PropertyViewmodel>();
+            var listV = new ObservableCollection<Model.PropertyViewmodel>();
             item1.Properties = listV;
 
             listV.Add(new Model.PropertyViewmodel("First Name", "Payton", item1));
@@ -179,7 +180,7 @@ namespace Orc.GraphExplorer.Tests
 
             var item1 = resultList.FirstOrDefault();
 
-            var list = new List<Model.PropertyViewmodel>();
+            var list = new ObservableCollection<Model.PropertyViewmodel>();
             item1.Properties = list;
 
             list.Add(new Model.PropertyViewmodel("First Name", "Payton", item1));

@@ -1,5 +1,6 @@
 ﻿using GraphX;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Orc.GraphExplorer.Tests.Mock;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -72,6 +73,32 @@ namespace Orc.GraphExplorer.Tests
             Assert.IsTrue(graphVM.HasChange);
             Assert.IsTrue(graphVM.HasRedoable);
             //Assert.IsTrue(graphVM.HasUndoable);
+        }
+
+        [TestMethod]
+        public void GraphExplorerViewmodel_Commit_Operation_Test()
+        {
+            var op1 = new MockOperation();
+            var op2 = new MockOperation();
+
+            var vm = new GraphExplorerViewmodel();
+
+            vm.Do(op1);
+
+            Assert.IsTrue(vm.HasUndoable);
+            Assert.AreEqual(vm.Operations.Count, 1);
+            Assert.IsTrue(op1.DoCalled);
+
+            vm.Do(op2);
+
+            Assert.IsTrue(vm.HasUndoable);
+            Assert.AreEqual(vm.Operations.Count, 2);
+            Assert.IsTrue(op2.DoCalled);
+
+            vm.Commit();
+
+            Assert.IsFalse(vm.HasUndoable);
+            Assert.AreEqual(vm.Operations.Count, 0);
         }
     }
 }

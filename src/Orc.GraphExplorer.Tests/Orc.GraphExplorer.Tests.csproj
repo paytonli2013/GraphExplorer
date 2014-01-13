@@ -73,8 +73,10 @@
       <Link>Mock\MockGraphDataService.cs</Link>
     </Compile>
     <Compile Include="CsvGraphDataServiceTests.cs" />
+    <Compile Include="DataVertexTest.cs" />
     <Compile Include="GraphExplorerConfigurationTests.cs" />
     <Compile Include="GraphExplorerViewmodelTests.cs" />
+    <Compile Include="Mock\MockOperation.cs" />
     <Compile Include="OperationTests.cs" />
   </ItemGroup>
   <ItemGroup>
