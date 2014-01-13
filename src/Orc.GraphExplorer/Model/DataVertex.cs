@@ -13,7 +13,7 @@ using System.Collections.ObjectModel;
 
 namespace Orc.GraphExplorer
 {
-    public class DataVertex : VertexBase, INotifyPropertyChanged,IDisposable
+    public class DataVertex : VertexBase, INotifyPropertyChanged, IDisposable
     {
         bool isSelected;
 
@@ -24,6 +24,30 @@ namespace Orc.GraphExplorer
             {
                 isSelected = value;
                 RaisePropertyChanged("IsSelected");
+            }
+        }
+
+        bool _isExpanded;
+
+        public bool IsExpanded
+        {
+            get { return _isExpanded; }
+            set
+            {
+                _isExpanded = value;
+                RaisePropertyChanged("IsExpanded");
+                FireIsExpandedChanged();
+            }
+        }
+
+        public event EventHandler IsExpandedChanged;
+
+        void FireIsExpandedChanged()
+        {
+            var handler = IsExpandedChanged;
+            if (handler != null)
+            {
+                handler.Invoke(this, new EventArgs());
             }
         }
 
@@ -182,7 +206,7 @@ namespace Orc.GraphExplorer
             if (Properties == null)
                 Properties = new ObservableCollection<PropertyViewmodel>();
 
-            Properties.Add(new PropertyViewmodel("", "", this) { IsEditing = true});
+            Properties.Add(new PropertyViewmodel("", "", this) { IsEditing = true });
         }
 
         DelegateCommand _resetCommand;

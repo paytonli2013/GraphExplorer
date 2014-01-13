@@ -107,11 +107,11 @@ namespace Orc.GraphExplorer
             {
                 var edge = eCtrl.Edge as DataEdge;
 
-                var op = new DeleteEdgeOperation(Area, edge.Source, edge.Target, edge, (ec) => 
+                var op = new DeleteEdgeOperation(Area, edge.Source, edge.Target, edge, (ec) =>
                 {
                     //do nothing
                 },
-                (ec) => 
+                (ec) =>
                 {
                     //do nothing
                 });
@@ -141,9 +141,9 @@ namespace Orc.GraphExplorer
         void miDeleteVertex_Click(object sender, RoutedEventArgs e)
         {
             var vCtrl = (sender as System.Windows.Controls.MenuItem).Tag as VertexControl;
-            if (vCtrl != null) 
+            if (vCtrl != null)
             {
-                var op = new DeleteVertexOperation(Area, vCtrl.Vertex as DataVertex, (dv, vc) => 
+                var op = new DeleteVertexOperation(Area, vCtrl.Vertex as DataVertex, (dv, vc) =>
                 {
 
                 }, dv =>
@@ -330,7 +330,37 @@ namespace Orc.GraphExplorer
 
             CreateGraphArea(Area, Vertexes, Edges);
 
+            HookVertexEvent(Area);
+
             FitToBounds(Area.Dispatcher, zoomctrl);
+        }
+
+        private void HookVertexEvent(GraphArea Area)
+        {
+            foreach (var vertex in Area.VertexList)
+            {
+                vertex.Key.IsExpandedChanged += (s, e) => vertex_IsExpandedChanged(s, e, vertex.Value);
+            }
+            //throw new NotImplementedException();
+        }
+
+        void vertex_IsExpandedChanged(object sender, EventArgs e, VertexControl vc)
+        {
+            if (!((DataVertex)sender).IsExpanded)
+            {
+                RunCodeInUiThread(() =>
+                {
+                    foreach (var edge in Area.GetRelatedControls(vc, GraphControlType.Edge, EdgesType.All))
+                    {
+                        var ec = edge as EdgeControl;
+                        var op = new DeleteEdgeOperation(Area, ec.Source.Vertex as DataVertex, ec.Target.Vertex as DataVertex, ec.Edge as DataEdge);
+                        op.Do();
+
+                        op.UnDo();
+                    }
+                });
+            }
+            //throw new NotImplementedException();
         }
 
         void OnEdgeLoaded(IEnumerable<DataEdge> edges)
@@ -344,15 +374,10 @@ namespace Orc.GraphExplorer
             area.ClearLayout();
 
             var graph = new Graph();
-            foreach (var vertex in vertexes)
-            {
-                graph.AddVertex(vertex);
-            }
 
-            foreach (var edge in edges)
-            {
-                graph.AddEdge(edge);
-            }
+            graph.AddVertexRange(vertexes);
+
+            graph.AddEdgeRange(edges);
 
             area.ExternalLayoutAlgorithm = new TopologicalLayoutAlgorithm<DataVertex, DataEdge, QuickGraph.BidirectionalGraph<DataVertex, DataEdge>>(graph);
 
@@ -850,6 +875,39 @@ namespace Orc.GraphExplorer
         void ShowAlertMessage(string message)
         {
             MessageBox.Show(message);
+        }
+
+        protected static void RunCodeInUiThread<T>(Action<T> action, T parameter, Dispatcher dispatcher = null, DispatcherPriority priority = DispatcherPriority.Background)
+        {
+            if (action == null)
+                return;
+
+            if (dispatcher != null)
+            {
+                dispatcher.BeginInvoke(action, priority, parameter);
+            }
+            else
+            {
+                action.Invoke(parameter);
+            }
+        }
+
+        protected static void RunCodeInUiThread(Action action, Dispatcher dispatcher = null, DispatcherPriority priority = DispatcherPriority.Background)
+        {
+            if (action == null)
+                return;
+
+            if (dispatcher == null && Application.Current != null)
+                dispatcher = Application.Current.Dispatcher;
+
+            if (dispatcher != null)
+            {
+                dispatcher.BeginInvoke(action, priority);
+            }
+            else
+            {
+                action.Invoke();
+            }
         }
     }
 }

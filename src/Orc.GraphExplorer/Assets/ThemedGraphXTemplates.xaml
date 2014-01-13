@@ -881,7 +881,7 @@
                         </Border>
 
                         <Border x:Name="BackgroundOver" CornerRadius="2" BorderThickness="{TemplateBinding BorderThickness}" Opacity="0" Background="{DynamicResource MouseOverBrush}" BorderBrush="{DynamicResource MouseOverBorderBrush}"/>
-                        <Expander HorizontalAlignment="Stretch" Foreground="{StaticResource NormalForegroudBrush}" Margin="0,10,0,0" Style="{StaticResource ExpanderStyle}" VerticalAlignment="Stretch">
+                        <Expander HorizontalAlignment="Stretch" IsExpanded="{Binding IsExpanded}" Foreground="{StaticResource NormalForegroudBrush}" Margin="0,10,0,0" Style="{StaticResource ExpanderStyle}" VerticalAlignment="Stretch">
                             <Expander.Header>
                                 <Rectangle Height="40"/>
                             </Expander.Header>
@@ -1060,6 +1060,7 @@
                 Value="Gray" />
         <Setter Property="Opacity"
                 Value="1" />
+        <Setter Property="Panel.ZIndex" Value="-1"/>
 
         <!--<Setter Property="ToolTip">
             <Setter.Value>
