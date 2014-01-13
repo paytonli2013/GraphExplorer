@@ -1,4 +1,5 @@
 ﻿using CsvHelper;
+using Orc.GraphExplorer.Model;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -120,15 +121,14 @@ namespace Orc.GraphExplorer
             var query = from record in records
                         group record by record.ID into g
                         select new { g.Key, Properties = g.ToDictionary(d => d.Property, d => d.Value) };
-
             List<DataVertex> vlist = new List<DataVertex>();
 
             foreach (var result in query)
             {
-                var vertex = new DataVertex(result.Key)
-                {
-                    Properties = result.Properties
-                };
+                var vertex = new DataVertex(result.Key);
+
+                vertex.SetProperties(result.Properties);
+                //vertex.Properties = GenerateProperties(result.Properties, vertex);
                 vlist.Add(vertex);
             }
 
@@ -235,7 +235,7 @@ namespace Orc.GraphExplorer
                     {
                         var id = v.Id;
 
-                        if (v.Properties != null)
+                        if (v.Properties != null && v.Properties.Count>0)
                         {
                             foreach (var p in v.Properties)
                             {
@@ -245,7 +245,17 @@ namespace Orc.GraphExplorer
                                 writer.NextRecord();
                             }
                         }
+                        else
+                        {
+                            writer.WriteField(id.ToString());
+                            writer.NextRecord();
+                        }
                     }
+                }
+
+                foreach (var v in vertexes)
+                {
+                    v.Commit();
                 }
 
                 vCache = MergeVertexesCache(vertexes, new Dictionary<int, DataVertex>());
@@ -306,6 +316,54 @@ namespace Orc.GraphExplorer
                     onComplete.Invoke(false, new Exception("error occured during update edges", ex));
                 }
             }
+        }
+
+        public void UpdateVertex(DataVertex vertex, Action<bool, DataVertex, Exception> onComplete)
+        {
+            if (vertex == null)
+                return;
+
+            try
+            {
+                if (vCache.ContainsKey(vertex.Id))
+                {
+                    vCache[vertex.Id] = vertex;
+                }
+                else
+                {
+                    vCache.Add(vertex.Id, vertex);
+                }
+
+                var list = vCache.Values.ToList();
+
+                UpdateVertexes(list, (r, e) =>
+                {
+                    if (onComplete != null)
+                    {
+                        onComplete.Invoke(r, vertex, e);
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                if (onComplete != null)
+                {
+                    onComplete.Invoke(true, vertex, new Exception(string.Format("error occuered during updating vertex to csv. vertex id [{0}]", vertex.ID), ex));
+                }
+                else
+                    throw new Exception(string.Format("error occuered during updating vertex to csv. vertex id [{0}]", vertex.ID), ex);
+            }
+        }
+
+
+        public void UpdateVertex(DataVertex vertex, Action<bool, Exception> onComplete)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void UpdateEdges(IEnumerable<DataEdge> vertexes, Action<bool, DataVertex, Exception> onComplete)
+        {
+            throw new NotImplementedException();
         }
     }
 }

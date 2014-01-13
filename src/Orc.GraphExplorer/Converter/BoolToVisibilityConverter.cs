@@ -11,19 +11,37 @@ namespace Orc.GraphExplorer.Converter
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
+            bool isRevered = parameter != null ? parameter.ToString() == "R" : false;
+
             Visibility retVal = Visibility.Collapsed;
             bool locVal = (bool)value;
+
+            if (isRevered)
+                locVal = !locVal;
+
             if (locVal)
                 retVal = Visibility.Visible;
+            else
+                retVal = Visibility.Collapsed;
+
             return retVal;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
+            bool isRevered = parameter != null ? parameter.ToString() == "R" : false;
+
             Visibility locVal = (Visibility)value;
+
             bool retVal = false;
+
             if (locVal == Visibility.Visible)
+            {
                 retVal = true;
+
+                if (isRevered)
+                    retVal = !retVal;
+            }
             return retVal;
         }
     }

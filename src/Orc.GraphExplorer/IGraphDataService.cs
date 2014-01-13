@@ -13,6 +13,8 @@ namespace Orc.GraphExplorer
 
         void Clear();
 
+        void UpdateVertex(DataVertex vertex, Action<bool, DataVertex, Exception> onComplete);
+
         void UpdateVertexes(IEnumerable<DataVertex> vertexes, Action<bool,Exception> onComplete);
 
         void UpdateEdges(IEnumerable<DataEdge> vertexes, Action<bool, Exception> onComplete); 

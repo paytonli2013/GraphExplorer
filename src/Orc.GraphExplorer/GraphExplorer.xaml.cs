@@ -39,6 +39,8 @@ namespace Orc.GraphExplorer
             get { return tbtnCanEdit.IsChecked.HasValue && tbtnCanEdit.IsChecked.Value; }
         }
 
+        GraphExplorerViewmodel _viewmodel;
+
         public GraphExplorer()
         {
             InitializeComponent();
@@ -54,6 +56,10 @@ namespace Orc.GraphExplorer
 
             AreaNav.GenerateGraphFinished += Area_RelayoutFinished;
             Area.GenerateGraphFinished += Area_RelayoutFinished;
+
+            _viewmodel = new GraphExplorerViewmodel();
+            _viewmodel.View = this;
+            DataContext = _viewmodel;
 
             this.Loaded += (s, e) =>
             {
@@ -71,8 +77,6 @@ namespace Orc.GraphExplorer
                 }
             };
         }
-
-
 
         void Area_RelayoutFinished(object sender, EventArgs e)
         {
@@ -98,15 +102,21 @@ namespace Orc.GraphExplorer
 
         void miDeleteLink_Click(object sender, RoutedEventArgs e)
         {
-            var ec = (sender as System.Windows.Controls.MenuItem).Tag as EdgeControl;
-            if (ec != null)
+            var eCtrl = (sender as System.Windows.Controls.MenuItem).Tag as EdgeControl;
+            if (eCtrl != null)
             {
-                var edge = ec.Edge as DataEdge;
-                if (edge != null)
+                var edge = eCtrl.Edge as DataEdge;
+
+                var op = new DeleteEdgeOperation(Area, edge.Source, edge.Target, (ec) => 
                 {
-                    Area.Graph.RemoveEdge(edge);
-                    Area.RemoveEdge(edge);
-                }
+                    //do nothing
+                },
+                (ec) => 
+                {
+                    //do nothing
+                });
+
+                _viewmodel.Do(op);
             }
             //throw new NotImplementedException();
         }
@@ -130,8 +140,19 @@ namespace Orc.GraphExplorer
 
         void miDeleteVertex_Click(object sender, RoutedEventArgs e)
         {
-            var vc = (sender as System.Windows.Controls.MenuItem).Tag as VertexControl;
-            if (vc != null) SafeRemoveVertex(vc, Area, true);
+            var vCtrl = (sender as System.Windows.Controls.MenuItem).Tag as VertexControl;
+            if (vCtrl != null) 
+            {
+                var op = new DeleteVertexOperation(Area, vCtrl.Vertex as DataVertex, (dv, vc) => 
+                {
+
+                }, dv =>
+                {
+                    Area.RelayoutGraph(true);
+                });
+
+                _viewmodel.Do(op);
+            }
         }
 
         //another constructor for inject IGraphDataService to graph explorer
@@ -295,13 +316,12 @@ namespace Orc.GraphExplorer
             //This property sets edge routing algorithm that is used to build route paths according to algorithm logic.
             //For ex., SimpleER algorithm will try to set edge paths around vertices so no edge will intersect any vertex.
             //Bundling algorithm will try to tie different edges that follows same direction to a single channel making complex graphs more appealing.
-            area.DefaultEdgeRoutingAlgorithm = GraphX.EdgeRoutingAlgorithmTypeEnum.SimpleER;
+            area.DefaultEdgeRoutingAlgorithm = GraphX.EdgeRoutingAlgorithmTypeEnum.None;
 
             //This property sets async algorithms computation so methods like: Area.RelayoutGraph() and Area.GenerateGraph()
             //will run async with the UI thread. Completion of the specified methods can be catched by corresponding events:
             //Area.RelayoutFinished and Area.GenerateGraphFinished.
             area.AsyncAlgorithmCompute = true;
-
         }
 
         void OnVertexesLoaded(IEnumerable<DataVertex> vertexes)
@@ -335,7 +355,6 @@ namespace Orc.GraphExplorer
             }
 
             area.ExternalLayoutAlgorithm = new TopologicalLayoutAlgorithm<DataVertex, DataEdge, QuickGraph.BidirectionalGraph<DataVertex, DataEdge>>(graph);
-
 
             area.GenerateGraph(graph, true, true);
 
@@ -450,16 +469,7 @@ namespace Orc.GraphExplorer
 
         private void InnerRefreshGraph()
         {
-            var dispatcher = Area.Dispatcher;
-
-            overrallTab.IsSelected = true;
-
-            int vCount = Vertexes.Count();
-
-            CreateGraphArea(Area, Vertexes, Edges);
-
-            if (vCount > 2)
-                FitToBounds(Area.Dispatcher, zoomctrl);
+            GetEdges();
         }
 
         private void btnClose_Click(object sender, RoutedEventArgs e)
@@ -494,7 +504,6 @@ namespace Orc.GraphExplorer
             {
                 MessageBox.Show(ex.ToString());
             }
-
         }
 
         private void btnLoad_Click(object sender, RoutedEventArgs e)
@@ -555,11 +564,47 @@ namespace Orc.GraphExplorer
 
         private void UpdateCanDrag(GraphArea area, bool canDrag)
         {
-            foreach (var v in area.VertexList)
+            foreach (var item in area.VertexList)
             {
-                DragBehaviour.SetIsDragEnabled(v.Value, canDrag);
+                DragBehaviour.SetIsDragEnabled(item.Value, canDrag);
+
+                if (canDrag)
+                {
+                    item.Value.EventOptions.PositionChangeNotification = true;
+                    item.Value.PositionChanged -= Value_PositionChanged;
+                    item.Value.PositionChanged += Value_PositionChanged;
+                }
             }
             //throw new NotImplementedException();
+        }
+
+        void Value_PositionChanged(object sender, GraphX.Models.VertexPositionEventArgs args)
+        {
+            double offset = 20;
+            var zoomtop = zoomctrl.TranslatePoint(new Point(0, 0), Area);
+            //dg_Area.UpdateLayout();
+            var zoombottom = new Point(Area.ActualWidth, Area.ActualHeight);
+
+            var posOff = args.OffsetPosition;
+            var pos = args.Position;
+
+            //if (posOff.X < zoomtop.X)
+            //{
+            //    GraphAreaBase.SetX(args.VertexControl, zoomtop.X + offset, true);
+            //}
+            //if (posOff.Y < zoomtop.Y + offset)
+            //{
+            //    GraphAreaBase.SetY(args.VertexControl, zoomtop.Y + pos.Y, true);
+            //}
+
+            //if (posOff.X > zoombottom.X)
+            //{
+            //    GraphAreaBase.SetX(args.VertexControl, zoombottom.X, true);
+            //}
+            //if (posOff.Y > zoombottom.Y)
+            //{
+            //    GraphAreaBase.SetY(args.VertexControl, zoombottom.Y + offset, true);
+            //}
         }
 
         private void SelectVertex(VertexControl vc)
@@ -590,7 +635,43 @@ namespace Orc.GraphExplorer
                 UpdateCanDrag(Area, tbtnCanDrag.IsChecked.Value);
             }
 
+            UpdateIsInEditMode(Area.VertexList, tbtnCanEdit.IsChecked.Value);
             UpdateHighlightBehaviour(true);
+        }
+
+        private void UpdateIsInEditMode(IDictionary<DataVertex, VertexControl> dictionary, bool isInEditMode)
+        {
+            if (dictionary == null)
+                return;
+
+            foreach (var v in dictionary)
+            {
+                v.Key.IsEditing = isInEditMode;
+
+                if (isInEditMode)
+                {
+                    v.Key.ChangedCommited += Key_ChangedCommited;
+                }
+                else
+                {
+                    v.Key.ChangedCommited -= Key_ChangedCommited;
+                }
+            }
+            //throw new NotImplementedException();
+        }
+
+        void Key_ChangedCommited(object sender, EventArgs e)
+        {
+            var data = (DataVertex)sender;
+
+            GraphDataService.UpdateVertex(data, (r, v, ex) =>
+            {
+                if (ex != null)
+                {
+                    ShowAlertMessage(ex.ToString());
+                }
+            });
+            //throw new NotImplementedException();
         }
 
         private void UpdateHighlightBehaviour(bool clearSelectedVertices)
@@ -643,9 +724,16 @@ namespace Orc.GraphExplorer
                 });
 
                 _selectedVertices.Clear();
+
+                //clear dirty flag
+                _viewmodel.Commit();
+
                 tbtnCanEdit.IsChecked = false;
 
-                GetEdges();
+                UpdateIsInEditMode(Area.VertexList, tbtnCanEdit.IsChecked.Value);
+
+                UpdateHighlightBehaviour(true);
+                //GetEdges();
             }
             catch (Exception ex)
             {
@@ -661,7 +749,7 @@ namespace Orc.GraphExplorer
                 {
                     CreateEdge(_selectedVertices[0], _selectedVertices[1], Area);
 
-                    FitToBounds(Area.Dispatcher,zoomctrl);
+                    //FitToBounds(Area.Dispatcher, zoomctrl);
                 }
                 else
                 {
@@ -688,68 +776,57 @@ namespace Orc.GraphExplorer
 
         private void CreateVertex(GraphArea area, Zoombox zoom)
         {
-            var vertex = DataVertex.Create();
+            _viewmodel.Do(new CreateVertexOperation(Area, null,
+                (v, vc) =>
+                {
+                    _selectedVertices.Add(v.Id);
 
-            Area.Graph.AddVertex(vertex);
+                    area.RelayoutGraph(true);
 
-            var vCtrl = new VertexControl(vertex);
+                    UpdateHighlightBehaviour(false);
 
-            _selectedVertices.Add(vertex.Id);
+                    foreach (var selectedV in _selectedVertices)
+                    {
+                        var localvc = area.VertexList.Where(pair => pair.Key.Id == selectedV).Select(pair => pair.Value).FirstOrDefault();
+                        HighlightBehaviour.SetHighlighted(localvc, true);
+                    }
+                },
+                (v) =>
+                {
+                    _selectedVertices.Remove(v.Id);
+                    //on vertex recreated
+                }));
 
-            area.AddVertex(vertex, vCtrl);
 
-            //area.RelayoutGraph();
-            //area.GenerateAllEdges();
-            //area.ShowAllEdgesLabels();
-            //area.InvalidateVisual();
-            //area.GenerateGraph(area.Graph, true);
-            area.GenerateGraph();
-            area.GenerateAllEdges();
-            area.ShowAllEdgesLabels();
 
-            UpdateHighlightBehaviour(false);
-
-            foreach (var selectedV in _selectedVertices)
-            {
-                var vc = area.VertexList.Where(pair => pair.Key.Id == selectedV).Select(pair=>pair.Value).FirstOrDefault();
-                HighlightBehaviour.SetHighlighted(vc, true);
-            }
-
-            FitToBounds(area.Dispatcher, zoom);
+            //FitToBounds(area.Dispatcher, zoom);
         }
 
-        private void CreateEdge(int fromId,int toId, GraphArea area)
+        private void CreateEdge(int fromId, int toId, GraphArea area)
         {
-            VertexControl from = area.VertexList.Where(pair => pair.Key.Id == fromId).Select(pair=>pair.Value).FirstOrDefault();
-            VertexControl to = area.VertexList.Where(pair => pair.Key.Id == toId).Select(pair => pair.Value).FirstOrDefault();
-            if (from == null || to == null)
+            var source = area.VertexList.Where(pair => pair.Key.Id == fromId).Select(pair => pair.Key).FirstOrDefault();
+            var target = area.VertexList.Where(pair => pair.Key.Id == toId).Select(pair => pair.Key).FirstOrDefault();
+            if (source == null || target == null)
                 return;
 
-            var edge = new DataEdge(from.Vertex as DataVertex, to.Vertex as DataVertex);
-            var edgeControl = new EdgeControl(from, to, edge)
-            {
-                ShowArrows = true,
-                ShowLabel = true
-            };
+            _viewmodel.Do(new CreateEdgeOperation(Area, source, target,
+                (e) =>
+                {
+                    //on vertex created
+                    //_selectedVertices.Add(v.Id);
+                    HighlightBehaviour.SetIsHighlightEnabled(e, false);
+                    HighlightBehaviour.SetHighlighted(e, false);
 
-            HighlightBehaviour.SetIsHighlightEnabled(edgeControl, false);
-            HighlightBehaviour.SetHighlighted(edgeControl, false);
+                    HighlightBehaviour.SetHighlighted(area.VertexList[source], false);
+                    HighlightBehaviour.SetHighlighted(area.VertexList[target], false);
 
-            area.Graph.AddEdge(edge);
-            area.AddEdge(edge, edgeControl);
-
-            //area.RelayoutGraph();
-            //area.GenerateAllEdges();
-            //area.ShowAllEdgesLabels();
-            //area.InvalidateVisual();
-
-            area.GenerateGraph(true);
-            //area.InvalidateVisual();
-            //area.RelayoutGraph();
-            HighlightBehaviour.SetHighlighted(from, false);
-            HighlightBehaviour.SetHighlighted(to, false);
-
-            UpdateHighlightBehaviour(true);
+                    UpdateHighlightBehaviour(true);
+                },
+                (e) =>
+                {
+                    //_selectedVertices.Remove(v.Id);
+                    //on vertex recreated
+                }));
         }
 
         private void SafeRemoveVertex(VertexControl vc, GraphArea area, bool removeFromSelected = false)
@@ -766,7 +843,7 @@ namespace Orc.GraphExplorer
             area.Graph.RemoveVertex(v);
             area.RemoveVertex(v);
 
-            if (removeFromSelected && v!=null && _selectedVertices.Contains(v.Id))
+            if (removeFromSelected && v != null && _selectedVertices.Contains(v.Id))
                 _selectedVertices.Remove(v.Id);
         }
 

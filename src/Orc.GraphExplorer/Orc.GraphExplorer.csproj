@@ -21,6 +21,9 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>
+    </DocumentationFile>
+    <RegisterForComInterop>false</RegisterForComInterop>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -38,6 +41,9 @@
     <Reference Include="GraphX, Version=0.1.0.1, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\GraphX.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Prism">
+      <HintPath>..\..\lib\Microsoft.Practices.Prism.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -86,6 +92,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Converter\BoolToVisibilityConverter.cs" />
+    <Compile Include="Operation\DeleteEdgeOperation.cs" />
+    <Compile Include="Operation\EdgeOperation.cs" />
+    <Compile Include="Operation\VertexOperation.cs" />
+    <Compile Include="Operation\CreateEdgeOperation.cs" />
+    <Compile Include="Operation\CreateVertexOperation.cs" />
     <Compile Include="CsvGraphDataService.cs" />
     <Compile Include="CsvGraphDataServiceConfig.cs" />
     <Compile Include="DataLoadedEventArgs.cs" />
@@ -95,9 +106,15 @@
     <Compile Include="GraphExplorer.xaml.cs">
       <DependentUpon>GraphExplorer.xaml</DependentUpon>
     </Compile>
+    <Compile Include="GraphExplorerViewmodel.cs" />
     <Compile Include="IDataProvider.cs" />
     <Compile Include="IGraphDataService.cs" />
+    <Compile Include="IOperation.cs" />
+    <Compile Include="Model\NotificationObject.cs" />
+    <Compile Include="Model\PropertyViewmodel.cs" />
+    <Compile Include="Model\Result.cs" />
     <Compile Include="NavigateHistoryItem.cs" />
+    <Compile Include="Operation\DeleteVertexOperation.cs" />
     <Compile Include="SettingView.xaml.cs">
       <DependentUpon>SettingView.xaml</DependentUpon>
     </Compile>
@@ -148,6 +165,18 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Assets\appbar.vector.rectangle.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\appbar.redo.curve.disable.design" />
+    <None Include="Assets\appbar.undo.curve.disable.design" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\appbar.redo.curve.disable.png" />
+    <Resource Include="Assets\appbar.undo.curve.disable.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\appbar.redo.curve.png" />
+    <Resource Include="Assets\appbar.undo.curve.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -4,10 +4,13 @@
     xmlns:po="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
     xmlns:win="clr-namespace:System.Windows;assembly=PresentationFramework"
     xmlns:gxl="clr-namespace:GraphX;assembly=GraphX"
+    xmlns:converter="clr-namespace:Orc.GraphExplorer.Converter;assembly=Orc.GraphExplorer"
     xmlns:conv="clr-namespace:GraphX.Converters;assembly=GraphX">
 
     <!--Buttons-->
-
+    <converter:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+    <BitmapImage x:Key="AddImageSource" UriSource="appbar.add.png" />
+    <BitmapImage x:Key="ResetImageSource" UriSource="appbar.close.png" />
     <BitmapImage x:Key="RefreshImageSource" UriSource="appbar.refresh.png" />
     <BitmapImage x:Key="SaveImageSource" UriSource="appbar.save.png" />
     <BitmapImage x:Key="CloseImageSource" UriSource="appbar.close.png" />
@@ -18,9 +21,85 @@
     <BitmapImage x:Key="DragImageSource" UriSource="appbar.cursor.hand.png" />
     <BitmapImage x:Key="EdgeImageSource" UriSource="appbar.vector.line.png" />
     <BitmapImage x:Key="VertexImageSource" UriSource="appbar.vector.rectangle.png" />
+    <BitmapImage x:Key="RedoDisableImageSource" UriSource="appbar.redo.curve.disable.png" />
+    <BitmapImage x:Key="UndoDisableImageSource" UriSource="appbar.undo.curve.disable.png" />
+    <BitmapImage x:Key="RedoImageSource" UriSource="appbar.redo.curve.png" />
+    <BitmapImage x:Key="UndoImageSource" UriSource="appbar.undo.curve.png" />
     <SolidColorBrush x:Key="Button.Disabled.Foreground" Color="#FF838383"/>
     <SolidColorBrush x:Key="Button.MouseOver.Background" Color="#FFF5F5E6"/>
     <SolidColorBrush x:Key="Button.MouseOver.Border" Color="#FFF2F216"/>
+    <Style x:Key="UndoButtonStyle" TargetType="{x:Type Button}">
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Padding" Value="1"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="true">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <ContentPresenter x:Name="contentPresenter" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                            <Image Grid.Column="1" Name="img" Margin="2" Source="{StaticResource UndoImageSource}"/>
+                            <Image Grid.Column="1" Name="imgDisable" Margin="2" Visibility="Collapsed" Source="{StaticResource UndoDisableImageSource}"/>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="{StaticResource Button.Disabled.Foreground}"/>
+                            <Setter Property="Visibility" TargetName="img" Value="Collapsed"/>
+                            <Setter Property="Visibility" TargetName="imgDisable" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="true">
+                            <Setter Property="Background" TargetName="border" Value="{StaticResource Button.MouseOver.Background}"/>
+                            <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource Button.MouseOver.Border}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="RedoButtonStyle" TargetType="{x:Type Button}">
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Padding" Value="1"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="true">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <ContentPresenter x:Name="contentPresenter" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                            <Image Grid.Column="1" Name="img" Margin="2" Source="{StaticResource RedoImageSource}"/>
+                            <Image Grid.Column="1" Name="imgDisable" Margin="2" Visibility="Collapsed" Source="{StaticResource RedoDisableImageSource}"/>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="{StaticResource Button.Disabled.Foreground}"/>
+                            <Setter Property="Visibility" TargetName="img" Value="Collapsed"/>
+                            <Setter Property="Visibility" TargetName="imgDisable" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="true">
+                            <Setter Property="Background" TargetName="border" Value="{StaticResource Button.MouseOver.Background}"/>
+                            <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource Button.MouseOver.Border}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
     <Style x:Key="VertexButtonStyle" TargetType="{x:Type Button}">
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="BorderBrush" Value="Transparent"/>
@@ -138,6 +217,72 @@
                             </Grid.ColumnDefinitions>
                             <ContentPresenter x:Name="contentPresenter" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
                             <Image Grid.Column="1" Source="{StaticResource SaveImageSource}"/>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="{StaticResource Button.Disabled.Foreground}"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="true">
+                            <Setter Property="Background" TargetName="border" Value="{StaticResource Button.MouseOver.Background}"/>
+                            <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource Button.MouseOver.Border}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="AddButtonStyle" TargetType="{x:Type Button}">
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Padding" Value="1"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="true">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <ContentPresenter x:Name="contentPresenter" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                            <Image Grid.Column="1" Source="{StaticResource AddImageSource}"/>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="{StaticResource Button.Disabled.Foreground}"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="true">
+                            <Setter Property="Background" TargetName="border" Value="{StaticResource Button.MouseOver.Background}"/>
+                            <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource Button.MouseOver.Border}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="ResetButtonStyle" TargetType="{x:Type Button}">
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Padding" Value="1"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="true">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <ContentPresenter x:Name="contentPresenter" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                            <Image Grid.Column="1" Source="{StaticResource ResetImageSource}"/>
                         </Grid>
                     </Border>
                     <ControlTemplate.Triggers>
@@ -714,14 +859,14 @@
                             <DoubleAnimation Duration="00:00:00.1000000" Storyboard.TargetName="BackgroundOver" Storyboard.TargetProperty="Opacity" To="1" />
                             <DoubleAnimation Duration="00:00:00.1000000" Storyboard.TargetName="DropShadowEffect" Storyboard.TargetProperty="Opacity" To=".5" />
 
-                            <DoubleAnimation Duration="00:00:00.2000000" Storyboard.TargetName="root" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.1" />
-                            <DoubleAnimation Duration="00:00:00.2000000" Storyboard.TargetName="root" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.1" />
+                            <!--<DoubleAnimation Duration="00:00:00.2000000" Storyboard.TargetName="root" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.01" />
+                            <DoubleAnimation Duration="00:00:00.2000000" Storyboard.TargetName="root" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.01" />-->
                         </Storyboard>
                         <Storyboard x:Key="HoverOff">
                             <DoubleAnimation Duration="00:00:00.1000000" Storyboard.TargetName="BackgroundOver" Storyboard.TargetProperty="Opacity" To="0" />
                             <DoubleAnimation Duration="00:00:00.1000000" Storyboard.TargetName="DropShadowEffect" Storyboard.TargetProperty="Opacity" To=".2" />
-                            <DoubleAnimation Duration="00:00:00.1000000" Storyboard.TargetName="root" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1" />
-                            <DoubleAnimation Duration="00:00:00.1000000" Storyboard.TargetName="root" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1" />
+                            <!--<DoubleAnimation Duration="00:00:00.1000000" Storyboard.TargetName="root" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1" />
+                            <DoubleAnimation Duration="00:00:00.1000000" Storyboard.TargetName="root" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1" />-->
                         </Storyboard>
                     </ControlTemplate.Resources>
 
@@ -740,42 +885,48 @@
                             <Expander.Header>
                                 <Rectangle Height="40"/>
                             </Expander.Header>
-
-                            <ScrollViewer Background="{StaticResource ScrollViewBackground}" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" VerticalAlignment="Top" Grid.Row="1" Grid.ColumnSpan="2" MaxHeight="200">
-                                <ItemsControl ItemsSource="{Binding Properties}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Grid Margin="6,4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" MinWidth="100"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock HorizontalAlignment="Left" Text="{Binding Key,StringFormat=' {0}: '}"></TextBlock>
-                                                <TextBlock Text="{Binding Value}" Grid.Column="1"></TextBlock>
-                                            </Grid>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </ScrollViewer>
-                            <!--<DataGrid Background="{StaticResource ScrollViewBackground}" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" VerticalAlignment="Top" Grid.Row="1" Grid.ColumnSpan="2" MaxHeight="200"
-                                    HeadersVisibility="None"
-                                    CanUserAddRows="True"
-                                    CanUserDeleteRows="True"
-                                    CanUserReorderColumns="False"
-                                    CanUserResizeColumns="False"
-                                    CanUserSortColumns="False"
-                                    CanUserResizeRows="False"
-                                    GridLinesVisibility="None"
-                                    BorderThickness="0"
-                                    ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                    ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                    AutoGenerateColumns="False" 
-                                    ItemsSource="{Binding Properties}">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Binding="{Binding Key,StringFormat=' {0}: '}" IsReadOnly="True"/>
-                                    <DataGridTextColumn Binding="{Binding Value}"/>
-                                </DataGrid.Columns>
-                            </DataGrid>-->
+                            <Grid Grid.Row="1" Grid.ColumnSpan="2">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <ScrollViewer Background="{StaticResource ScrollViewBackground}" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" VerticalAlignment="Top" MaxHeight="200">
+                                    <ItemsControl ItemsSource="{Binding Properties}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="6,4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                                    <Grid Visibility="{Binding IsEditing,Converter={StaticResource BoolToVisibilityConverter},ConverterParameter='R'}">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" MinWidth="100"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock HorizontalAlignment="Left" Text="{Binding Key,StringFormat=' {0}: '}"></TextBlock>
+                                                        <TextBlock Text="{Binding Value}" Grid.Column="1"></TextBlock>
+                                                    </Grid>
+                                                    <Grid Visibility="{Binding IsEditing,Converter={StaticResource BoolToVisibilityConverter}}">
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="*"/>
+                                                            <RowDefinition Height="Auto"/>
+                                                        </Grid.RowDefinitions>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="100" MinWidth="100"/>
+                                                            <ColumnDefinition Width="100"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBox Margin="0,0,1,0" HorizontalAlignment="Stretch" Text="{Binding Key,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                                                        <TextBox HorizontalAlignment="Stretch" Text="{Binding Value,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Grid.Column="1"></TextBox>
+                                                    </Grid>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                                <!---->
+                                <StackPanel Visibility="{Binding IsInEditMode, Converter={StaticResource BoolToVisibilityConverter}}" Margin="2" Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Name="editPanel">
+                                    <!--<ToggleButton Width="24" Height="24" IsChecked="{Binding IsEditing}" Margin="2" Style="{StaticResource EditToggleButtonStyle}"/>-->
+                                <Button Style="{StaticResource AddButtonStyle}" ToolTip="Add Property" Margin="2" Command="{Binding AddCommand}" Height="24" Width="24"/>
+                                <Button Style="{StaticResource ResetButtonStyle}" ToolTip="Reset" Margin="2" Command="{Binding ResetCommand}" Height="24" Width="24"/>
+                                </StackPanel>
+                            </Grid>
                         </Expander>
                         <Grid VerticalAlignment="Top" Margin="6">
                             <Grid.RowDefinitions>
@@ -864,7 +1015,7 @@
             </Trigger>
         </Style.Triggers>
     </Style>
-    
+
     <!--EDGE LABLE CONTROL -->
     <Style x:Key="EdgeLabelControlStyle" TargetType="{x:Type gxl:EdgeLabelControl}">
         <Setter Property="Template">
@@ -934,6 +1085,6 @@
             </Trigger>
         </Style.Triggers>
     </Style>
-    
-  
+
+
 </ResourceDictionary>

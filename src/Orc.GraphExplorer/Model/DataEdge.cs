@@ -10,7 +10,7 @@ using YAXLib;
 namespace Orc.GraphExplorer
 {
     [Serializable]
-    public class DataEdge : EdgeBase<DataVertex>
+    public class DataEdge : EdgeBase<DataVertex>,IDisposable
     {
         public DataEdge(DataVertex source, DataVertex target, double weight = 1)
 			: base(source, target, weight)
@@ -18,7 +18,7 @@ namespace Orc.GraphExplorer
 		}
 
         public DataEdge()
-            : base(null, null, 1)
+            : base(null, null, 1) 
         {
         }
 
@@ -40,5 +40,9 @@ namespace Orc.GraphExplorer
             get { return this; }
         }
 
+        public void Dispose()
+        {
+            //throw new NotImplementedException();
+        }
     }
 }

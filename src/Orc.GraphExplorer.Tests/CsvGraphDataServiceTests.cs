@@ -83,8 +83,8 @@ namespace Orc.GraphExplorer.Tests
             var vertex1 = vlist.First();
 
             Assert.AreEqual(vertex1.ID, 1);
-            Assert.AreEqual(vertex1.Properties.Count, 2);
-            Assert.AreEqual(vertex1.Properties["First Name"], "ABC11");
+            Assert.AreEqual(vertex1.Properties.Count(), 2);
+            Assert.AreEqual(vertex1.Properties.First(p => p.Key == "First Name").Value, "ABC11");
         }
 
         [TestMethod]
@@ -117,12 +117,12 @@ namespace Orc.GraphExplorer.Tests
             Exception er;
             List<DataVertex> list = new List<DataVertex>();
             var item1 = new DataVertex(1);
+            var listV = new List<Model.PropertyViewmodel>();
+            item1.Properties = listV;
 
-            item1.Properties = new Dictionary<string, string>();
-
-            item1.Properties.Add("First Name", "Payton");
-            item1.Properties.Add("Last Name", "Li");
-            item1.Properties.Add("Age", "29");
+            listV.Add(new Model.PropertyViewmodel("First Name", "Payton", item1));
+            listV.Add(new Model.PropertyViewmodel("Last Name", "Li", item1));
+            listV.Add(new Model.PropertyViewmodel("Age", "29", item1));
 
             list.Add(item1);
 
@@ -144,6 +144,53 @@ namespace Orc.GraphExplorer.Tests
             Assert.IsTrue(callSuccess);
             Assert.IsNotNull(item1FromSource);
             Assert.AreEqual(item1.Id, item1FromSource.Id);
+        }
+
+
+        [TestMethod]
+        public void UpdateVertex_Test()
+        {
+
+            //below are data tobe tested
+
+            //ID,Property,Value
+            //11,First Name,ABC11
+            //11,Last Name,XYZ11
+            //11,Age,13
+            //12,First Name,ABC12
+            //12,Last Name,XYZ12
+            //12,Age,34
+            //12,First Name1,ABC12
+            //12,Last Name1,XYZ12
+            //12,Age1,34
+            //12,First Name2,ABC12
+            //12,Last Name2,XYZ12
+            //12,Age2,34
+
+            var service = new CsvGraphDataService();
+            bool callSuccess = false;
+            bool callFail = false;
+            IEnumerable<DataVertex> resultList = null;
+            service.GetVertexes((data) => { callSuccess = true; resultList = data; }, (e) => { callFail = true; });
+
+            Assert.IsNotNull(resultList);
+            Assert.IsFalse(callFail);
+            Assert.IsTrue(callSuccess);
+
+            var item1 = resultList.FirstOrDefault();
+
+            var list = new List<Model.PropertyViewmodel>();
+            item1.Properties = list;
+
+            list.Add(new Model.PropertyViewmodel("First Name", "Payton", item1));
+            list.Add(new Model.PropertyViewmodel("Last Name", "Li", item1));
+            list.Add(new Model.PropertyViewmodel("Age", "29", item1));
+
+            service.UpdateVertex(item1, (r,data, error) =>
+            {
+                Assert.IsTrue(r);
+                Assert.AreEqual(item1, data);
+            });
         }
 
         [TestMethod]
