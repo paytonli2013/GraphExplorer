@@ -9,6 +9,7 @@ using System.Xml.Serialization;
 using YAXLib;
 using Orc.GraphExplorer.Model;
 using Microsoft.Practices.Prism.Commands;
+using System.Collections.ObjectModel;
 
 namespace Orc.GraphExplorer
 {
@@ -81,7 +82,7 @@ namespace Orc.GraphExplorer
 
         Dictionary<string, string> _properties;
 
-        public List<PropertyViewmodel> Properties { get; set; }
+        public ObservableCollection<PropertyViewmodel> Properties { get; set; }
 
         [YAXDontSerialize]
         public ImageSource Icon { get; set; }
@@ -133,11 +134,11 @@ namespace Orc.GraphExplorer
             Properties = GenerateProperties(dictionary, this);
         }
 
-        private static List<PropertyViewmodel> GenerateProperties(Dictionary<string, string> dictionary, DataVertex data)
+        private static ObservableCollection<PropertyViewmodel> GenerateProperties(Dictionary<string, string> dictionary, DataVertex data)
         {
             var pvs = from pair in dictionary select new PropertyViewmodel(pair.Key, pair.Value, data);
 
-            return pvs.ToList();
+            return new ObservableCollection<PropertyViewmodel>(pvs);
         }
 
         #region INotifyPropertyChanged
@@ -179,9 +180,9 @@ namespace Orc.GraphExplorer
         void ExecAdd()
         {
             if (Properties == null)
-                Properties = new List<PropertyViewmodel>();
+                Properties = new ObservableCollection<PropertyViewmodel>();
 
-            Properties.Add(new PropertyViewmodel("", "", this));
+            Properties.Add(new PropertyViewmodel("", "", this) { IsEditing = true});
         }
 
         DelegateCommand _resetCommand;
@@ -266,7 +267,7 @@ namespace Orc.GraphExplorer
 
         bool CanExecAdd()
         {
-            return IsInEditMode;
+            return true;
         }
 
         #endregion
