@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d"  
              xmlns:zb="clr-namespace:GraphX.Xceed.Wpf.Toolkit.Zoombox;assembly=GraphX"
+             xmlns:graphxctrl="clr-namespace:GraphX.Controls;assembly=GraphX"
              xmlns:model="clr-namespace:Orc.GraphExplorer.Model"  
              xmlns:local="clr-namespace:Orc.GraphExplorer" 
              xmlns:converter="clr-namespace:Orc.GraphExplorer.Converter"
@@ -57,9 +58,13 @@
                         </StackPanel>
                     </Border>
 
-                    <zb:Zoombox Grid.Column="1" KeepContentInBounds="False" x:Name="zoomctrl">
-                        <model:GraphArea x:Name="Area" />
-                    </zb:Zoombox>
+                    <graphxctrl:ZoomControl x:Name="zoomctrl" ZoomDeltaMultiplier="50" Grid.Column="1">
+                        <model:GraphArea x:Name="Area"/>
+                    </graphxctrl:ZoomControl>
+                                            
+                    <!--<zb:Zoombox Grid.Column="1" KeepContentInBounds="False" x:Name="zoomctrl">
+                        
+                    </zb:Zoombox>-->
                 </Grid>
 
             </TabItem>
@@ -83,11 +88,10 @@
                             <Button Height="28" Width="28" Name="btnExportNav" Style="{StaticResource ExportButtonStyle}" Click="btnExportNav_Click"/>
                         </StackPanel>
                     </Border>
-                    <zb:Zoombox Grid.Column="1" x:Name="zoomctrlNav" >
+                    <graphxctrl:ZoomControl Grid.Column="1"  ZoomDeltaMultiplier="50" x:Name="zoomctrlNav">
                         <model:GraphArea x:Name="AreaNav" />
-                    </zb:Zoombox>
+                    </graphxctrl:ZoomControl>
                 </Grid>
-
             </TabItem>
         </TabControl>
 

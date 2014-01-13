@@ -16,7 +16,8 @@ namespace Orc.GraphExplorer
         where TGraph : global::QuickGraph.IVertexAndEdgeListGraph<TVertex, TEdge>
     {
         TGraph _graph;
-        public TopologicalLayoutAlgorithm(TGraph graph)
+        double _rate;
+        public TopologicalLayoutAlgorithm(TGraph graph,double _rate)
         {
             _graph = graph;
         }
@@ -35,9 +36,10 @@ namespace Orc.GraphExplorer
 
             vertexPositions = new Dictionary<TVertex, Point>();
 
+            //vertexPositions = esla.VertexPositions;
             foreach (var item in esla.VertexPositions)
             {
-                vertexPositions.Add(item.Key, new Point(item.Value.Y*1.5, item.Value.X));
+                vertexPositions.Add(item.Key, new Point(item.Value.Y * 1.5, item.Value.X));
             }
         }
 

@@ -20,6 +20,7 @@ using GraphX.GraphSharp.Algorithms.Layout.Simple.Hierarchical;
 using System.Windows.Threading;
 using Microsoft.Win32;
 using GraphX;
+using GraphX.Controls;
 
 namespace Orc.GraphExplorer
 {
@@ -46,7 +47,7 @@ namespace Orc.GraphExplorer
             InitializeComponent();
 
             ApplySetting(zoomctrl, Area);
-            ApplySetting(zoomctrlNav, AreaNav);
+            ApplySetting(zoomctrlNav, AreaNav, true);
 
             Area.VertexDoubleClick += Area_VertexDoubleClick;
             AreaNav.VertexDoubleClick += AreaNav_VertexDoubleClick;
@@ -217,40 +218,29 @@ namespace Orc.GraphExplorer
             //overrallGraph.get
             var historyItem = GetHistoryItem(dataVertex, overrallGraph);
 
-            var graph = new Graph();
-
-            foreach (var vertex in historyItem.Vertexes)
-            {
-                graph.AddVertex(vertex);
-            }
-
-            foreach (var edge in historyItem.Edges)
-            {
-                graph.AddEdge(edge);
-            }
-
-            AreaNav.ExternalLayoutAlgorithm = new TopologicalLayoutAlgorithm<DataVertex, DataEdge, QuickGraph.BidirectionalGraph<DataVertex, DataEdge>>(graph);
-
-            AreaNav.GenerateGraph(graph, true, true);
+            CreateGraphArea(AreaNav, historyItem.Vertexes, historyItem.Edges);
 
             var dispatcher = AreaNav.Dispatcher;
 
             FitToBounds(dispatcher, zoomctrlNav);
         }
 
-        private void FitToBounds(System.Windows.Threading.Dispatcher dispatcher, Zoombox zoom)
+        private void FitToBounds(System.Windows.Threading.Dispatcher dispatcher, ZoomControl zoom)
         {
             if (dispatcher != null)
             {
                 dispatcher.BeginInvoke(new Action(()
                     =>
                 {
-                    zoom.FitToBounds();
+                    zoom.ZoomToFill();
+                    zoom.Mode = ZoomControlModes.Custom;
+                    //zoom.FitToBounds();
                 }), DispatcherPriority.Background);
             }
             else
             {
-                zoom.FitToBounds();
+                zoom.ZoomToFill();
+                zoom.Mode = ZoomControlModes.Custom;
             }
         }
 
@@ -302,17 +292,25 @@ namespace Orc.GraphExplorer
             GraphDataService.GetEdges(OnEdgeLoaded, OnError);
         }
 
-        void ApplySetting(Zoombox zoom, GraphArea area)
+        void ApplySetting(ZoomControl zoom, GraphArea area, bool nav = false)
         {
-            Zoombox.SetViewFinderVisibility(zoom, System.Windows.Visibility.Visible);
+            //Zoombox.SetViewFinderVisibility(zoom, System.Windows.Visibility.Visible);
 
             //This property sets vertex overlap removal algorithm.
             //Such algorithms help to arrange vertices in the layout so no one overlaps each other.
             area.DefaultOverlapRemovalAlgorithm = GraphX.OverlapRemovalAlgorithmTypeEnum.FSA;
             area.DefaultOverlapRemovalAlgorithmParams = Area.AlgorithmFactory.CreateOverlapRemovalParameters(GraphX.OverlapRemovalAlgorithmTypeEnum.FSA);
-            ((OverlapRemovalParameters)area.DefaultOverlapRemovalAlgorithmParams).HorizontalGap = 50;
-            ((OverlapRemovalParameters)area.DefaultOverlapRemovalAlgorithmParams).VerticalGap = 50;
 
+            if (nav)
+            {
+                ((OverlapRemovalParameters)area.DefaultOverlapRemovalAlgorithmParams).HorizontalGap = 300;
+                ((OverlapRemovalParameters)area.DefaultOverlapRemovalAlgorithmParams).VerticalGap = 150;
+            }
+            else
+            {
+                ((OverlapRemovalParameters)area.DefaultOverlapRemovalAlgorithmParams).HorizontalGap = 50;
+                ((OverlapRemovalParameters)area.DefaultOverlapRemovalAlgorithmParams).VerticalGap = 50;
+            }
             //This property sets edge routing algorithm that is used to build route paths according to algorithm logic.
             //For ex., SimpleER algorithm will try to set edge paths around vertices so no edge will intersect any vertex.
             //Bundling algorithm will try to tie different edges that follows same direction to a single channel making complex graphs more appealing.
@@ -321,7 +319,9 @@ namespace Orc.GraphExplorer
             //This property sets async algorithms computation so methods like: Area.RelayoutGraph() and Area.GenerateGraph()
             //will run async with the UI thread. Completion of the specified methods can be catched by corresponding events:
             //Area.RelayoutFinished and Area.GenerateGraphFinished.
-            area.AsyncAlgorithmCompute = true;
+            area.AsyncAlgorithmCompute = false;
+            //area.UseLayoutRounding = false;
+            area.UseNativeObjectArrange = false;
         }
 
         void OnVertexesLoaded(IEnumerable<DataVertex> vertexes)
@@ -379,13 +379,9 @@ namespace Orc.GraphExplorer
 
             graph.AddEdgeRange(edges);
 
-            area.ExternalLayoutAlgorithm = new TopologicalLayoutAlgorithm<DataVertex, DataEdge, QuickGraph.BidirectionalGraph<DataVertex, DataEdge>>(graph);
+            area.ExternalLayoutAlgorithm = new TopologicalLayoutAlgorithm<DataVertex, DataEdge, QuickGraph.BidirectionalGraph<DataVertex, DataEdge>>(graph, 1.5);
 
             area.GenerateGraph(graph, true, true);
-
-            //area.ShowAllEdgesLabels(true);
-            //show edage label
-            //area.InvalidateVisual();
         }
 
         void OnError(Exception ex)
@@ -593,43 +589,42 @@ namespace Orc.GraphExplorer
             {
                 DragBehaviour.SetIsDragEnabled(item.Value, canDrag);
 
-                if (canDrag)
-                {
-                    item.Value.EventOptions.PositionChangeNotification = true;
-                    item.Value.PositionChanged -= Value_PositionChanged;
-                    item.Value.PositionChanged += Value_PositionChanged;
-                }
+                //if (canDrag)
+                //{
+                //    item.Value.EventOptions.PositionChangeNotification = true;
+                //    item.Value.PositionChanged -= Value_PositionChanged;
+                //    item.Value.PositionChanged += Value_PositionChanged;
+                //}
+                //else
+                //{
+                //    item.Value.EventOptions.PositionChangeNotification = false;
+                //    item.Value.PositionChanged -= Value_PositionChanged;
+                //}
             }
             //throw new NotImplementedException();
         }
 
         void Value_PositionChanged(object sender, GraphX.Models.VertexPositionEventArgs args)
         {
-            double offset = 20;
             var zoomtop = zoomctrl.TranslatePoint(new Point(0, 0), Area);
-            //dg_Area.UpdateLayout();
+
             var zoombottom = new Point(Area.ActualWidth, Area.ActualHeight);
 
-            var posOff = args.OffsetPosition;
-            var pos = args.Position;
+            var pos = args.OffsetPosition;
 
-            //if (posOff.X < zoomtop.X)
-            //{
-            //    GraphAreaBase.SetX(args.VertexControl, zoomtop.X + offset, true);
-            //}
-            //if (posOff.Y < zoomtop.Y + offset)
-            //{
-            //    GraphAreaBase.SetY(args.VertexControl, zoomtop.Y + pos.Y, true);
-            //}
+            if (pos.X < zoomtop.X)
+            {
+                GraphAreaBase.SetX(args.VertexControl, zoomtop.X + 1, true);
+            }
 
-            //if (posOff.X > zoombottom.X)
-            //{
-            //    GraphAreaBase.SetX(args.VertexControl, zoombottom.X, true);
-            //}
-            //if (posOff.Y > zoombottom.Y)
-            //{
-            //    GraphAreaBase.SetY(args.VertexControl, zoombottom.Y + offset, true);
-            //}
+            if (pos.Y < zoomtop.Y)
+            {
+                GraphAreaBase.SetY(args.VertexControl, zoomtop.Y + 1, true);
+            }
+
+            if (pos.X > zoombottom.X) { GraphAreaBase.SetX(args.VertexControl, zoombottom.X, true); }
+            if (pos.Y > zoombottom.Y) { GraphAreaBase.SetY(args.VertexControl, zoombottom.Y, true); }
+
         }
 
         private void SelectVertex(VertexControl vc)
@@ -799,7 +794,7 @@ namespace Orc.GraphExplorer
             }
         }
 
-        private void CreateVertex(GraphArea area, Zoombox zoom)
+        private void CreateVertex(GraphArea area, ZoomControl zoom)
         {
             _viewmodel.Do(new CreateVertexOperation(Area, null,
                 (v, vc) =>
