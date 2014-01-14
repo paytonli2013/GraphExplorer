@@ -76,7 +76,7 @@
                                             LargeChange="0.2"
                                             SmallChange="0.1"
                                             Orientation="Horizontal" />
-                            <TextBlock Foreground="{StaticResource AccentBrush}" Width="40" Text="{Binding Path=Zoom,ElementName=zoomctrl,StringFormat='{}{0:P0}'}" FontSize="10" FontWeight="Normal" VerticalAlignment="Center" Margin="2"/>
+                            <TextBlock Foreground="{StaticResource AccentBrush}" Width="30" Text="{Binding Path=Zoom,ElementName=zoomctrl,StringFormat='{}{0:P0}'}" FontSize="10" FontWeight="Normal" VerticalAlignment="Center" Margin="2"/>
                             <ToggleButton Margin="1" Style="{StaticResource ToggleButtonStyle}" Width="28" Content="Fill" IsChecked="{Binding Mode,ElementName=zoomctrl,Converter={StaticResource equalityConverter},ConverterParameter={x:Static Controls:ZoomControlModes.Fill}}" />
                             <ToggleButton Margin="1" Style="{StaticResource ToggleButtonStyle}" Width="28" Content="1:1" IsChecked="{Binding Mode,ElementName=zoomctrl,Converter={StaticResource equalityConverter},ConverterParameter={x:Static Controls:ZoomControlModes.Original}}" />
                         </StackPanel>
@@ -121,7 +121,7 @@
                                             LargeChange="0.2"
                                             SmallChange="0.1"
                                             Orientation="Horizontal" />
-                            <TextBlock FontSize="10" Foreground="{StaticResource AccentBrush}" Width="40" Text="{Binding Path=Zoom,ElementName=zoomctrlNav,StringFormat='{}{0:P0}'}" FontWeight="Normal" VerticalAlignment="Center" Margin="2"/>
+                            <TextBlock FontSize="10" Foreground="{StaticResource AccentBrush}" Width="30" Text="{Binding Path=Zoom,ElementName=zoomctrlNav,StringFormat='{}{0:P0}'}" FontWeight="Normal" VerticalAlignment="Center" Margin="2"/>
                             <ToggleButton Margin="1" Width="28" Style="{StaticResource ToggleButtonStyle}" Content="Fill" IsChecked="{Binding Mode,ElementName=zoomctrlNav,Converter={StaticResource equalityConverter},ConverterParameter={x:Static Controls:ZoomControlModes.Fill}}" />
                             <ToggleButton Margin="1" Width="28" Style="{StaticResource ToggleButtonStyle}" Content="1:1" IsChecked="{Binding Mode,ElementName=zoomctrlNav,Converter={StaticResource equalityConverter},ConverterParameter={x:Static Controls:ZoomControlModes.Original}}" />
                         </StackPanel>

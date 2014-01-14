@@ -44,6 +44,8 @@ namespace Orc.GraphExplorer
             _vCtrl = new VertexControl(_vertex);
             _graph.AddVertex(_vertex, _vCtrl);
 
+            HighlightBehaviour.SetIsHighlightEnabled(_vCtrl, false);
+
             foreach (var edge in _relatedEdges)
             {
 
@@ -61,6 +63,8 @@ namespace Orc.GraphExplorer
 
                 _graph.Graph.AddEdge(edge.Item1);
                 _graph.AddEdge(edge.Item1, edgeCtrl);
+
+                HighlightBehaviour.SetIsHighlightEnabled(edgeCtrl, false);
             }
 
             if (_undoCallback != null)

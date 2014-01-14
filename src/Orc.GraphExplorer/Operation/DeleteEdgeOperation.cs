@@ -46,6 +46,8 @@ namespace Orc.GraphExplorer
             _graph.Graph.AddEdge(_Edge);
             _graph.AddEdge(_Edge, _eCtrl);
 
+            HighlightBehaviour.SetIsHighlightEnabled(_eCtrl, false);
+
             if (_undoCallback != null)
             {
                 _undoCallback.Invoke(_eCtrl);
