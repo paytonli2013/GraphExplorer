@@ -7,7 +7,9 @@
              xmlns:zb="clr-namespace:GraphX.Xceed.Wpf.Toolkit.Zoombox;assembly=GraphX"
              xmlns:graphxctrl="clr-namespace:GraphX.Controls;assembly=GraphX"
              xmlns:model="clr-namespace:Orc.GraphExplorer.Model"  
-             xmlns:local="clr-namespace:Orc.GraphExplorer" 
+             xmlns:local="clr-namespace:Orc.GraphExplorer"
+    xmlns:Controls="clr-namespace:GraphX.Controls;assembly=GraphX"
+             xmlns:Converters="clr-namespace:GraphX.Converters;assembly=GraphX"
              xmlns:converter="clr-namespace:Orc.GraphExplorer.Converter"
              d:DesignHeight="300" d:DesignWidth="300">
     <UserControl.Resources>
@@ -16,6 +18,8 @@
                 <ResourceDictionary Source="Assets/ThemedGraphXTemplates.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <converter:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+            <Converters:DoubleToLog10Converter x:Key="log10Converter" />
+            <Converters:EqualityToBooleanConverter x:Key="equalityConverter" />
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid Name="root">
@@ -36,7 +40,7 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <Border Margin="-1,60,0,0" Background="{StaticResource ScrollViewBackground}" BorderThickness="1" BorderBrush="{StaticResource NormalBorderBrush}">
+                    <Border Margin="-1,60,0,0" Width="32" Background="{StaticResource ScrollViewBackground}" BorderThickness="1" BorderBrush="{StaticResource NormalBorderBrush}">
                         <StackPanel Orientation="Vertical">
                             <Button ToolTip="Save Layout To Xml"  Height="28" Width="28" Name="btnSave" Style="{StaticResource SaveButtonStyle}" Click="btnSave_Click"/>
                             <Button Height="28" Width="28" ToolTip="Load Layout From Xml"  Name="btnLoad" Style="{StaticResource LoadButtonStyle}" Click="btnLoad_Click"/>
@@ -51,10 +55,27 @@
                                 <Button Height="28" ToolTip="Undo" Name="tbnUndo" Command="{Binding UndoCommand}" Width="28" Style="{StaticResource UndoButtonStyle}"/>
                                 <Button Height="28" ToolTip="Redo" Name="tbnRedo" Command="{Binding RedoCommand}" Width="28" Style="{StaticResource RedoButtonStyle}"/>
                                 <Button Height="28" ToolTip="Save Changes To Data Source" Name="tbnSaveChanges" Click="tbnSaveChanges_Click" Width="28" Style="{StaticResource SaveButtonStyle}"/>
-                                
+
                             </StackPanel>
                             <Rectangle Fill="{StaticResource NormalBorderBrush}" Height="1" HorizontalAlignment="Stretch" Margin="4"/>
                             <Button Height="28" Content="Refresh" ToolTip="Refresh Graph" Width="28" Name="btnRefresh" Style="{StaticResource RefershButtonStyle}" Click="btnRefresh_Click"/>
+                            <Rectangle Fill="{StaticResource NormalBorderBrush}" Height="1" HorizontalAlignment="Stretch" Margin="4"/>
+                            <Slider Style="{StaticResource SliderStyle}" Height="100"
+                                            Minimum="{Binding MinZoom,ElementName=zoomctrl,Converter={StaticResource log10Converter}}"
+                                            Maximum="{Binding ManZoom,ElementName=zoomctrl,Converter={StaticResource log10Converter}}"
+                                            Value="{Binding Zoom,ElementName=zoomctrl,Mode=TwoWay,Converter={StaticResource log10Converter}}"
+                                            HorizontalAlignment="Center"
+                                            Ticks="0.1, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2"
+                                            AutoToolTipPlacement="BottomRight"
+                                            AutoToolTipPrecision="1"
+                                            TickPlacement="None"
+                                            TickFrequency="1"
+                                            LargeChange="1"
+                                            SmallChange="0.1"
+                                            Orientation="Vertical" />
+                            <TextBlock MaxWidth="32" Text="{Binding Path=Zoom,ElementName=zoomctrl,StringFormat='{}{0:P0}'}" FontSize="10" FontWeight="Normal" HorizontalAlignment="Center" Margin="0,0,0,6"/>
+                            <ToggleButton Style="{StaticResource ToggleButtonStyle}" Content="Fill" IsChecked="{Binding Mode,ElementName=zoomctrl,Converter={StaticResource equalityConverter},ConverterParameter={x:Static Controls:ZoomControlModes.Fill}}" />
+                            <ToggleButton Style="{StaticResource ToggleButtonStyle}" Content="1:1" IsChecked="{Binding Mode,ElementName=zoomctrl,Converter={StaticResource equalityConverter},ConverterParameter={x:Static Controls:ZoomControlModes.Original}}" />
                         </StackPanel>
                     </Border>
 
@@ -63,7 +84,7 @@
                     </graphxctrl:ZoomControl>
                 </Grid>
             </TabItem>
-            <TabItem Name="navTab" Visibility="Hidden" Padding="1">
+            <TabItem Name="navTab" Visibility="Hidden" Padding="1" FontWeight="Bold">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Margin="8,0,0,0" FontWeight="Bold" Text="Navigate" VerticalAlignment="Center"/>
@@ -81,9 +102,26 @@
                     <Border Margin="-1,60,0,0" Background="{StaticResource ScrollViewBackground}" BorderThickness="1" BorderBrush="{StaticResource NormalBorderBrush}">
                         <StackPanel Orientation="Vertical">
                             <Button Height="28" Width="28" Name="btnExportNav" Style="{StaticResource ExportButtonStyle}" Click="btnExportNav_Click"/>
+                            <Rectangle Fill="{StaticResource NormalBorderBrush}" Height="1" HorizontalAlignment="Stretch" Margin="4"/>
+                            <Slider Style="{StaticResource SliderStyle}" Height="100"
+                                            Minimum="{Binding MinZoom,ElementName=zoomctrlNav,Converter={StaticResource log10Converter}}"
+                                            Maximum="{Binding ManZoom,ElementName=zoomctrlNav,Converter={StaticResource log10Converter}}"
+                                            Value="{Binding Zoom,ElementName=zoomctrlNav,Mode=TwoWay,Converter={StaticResource log10Converter}}"
+                                            HorizontalAlignment="Center"
+                                            Ticks="0.1, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2"
+                                            AutoToolTipPlacement="BottomRight"
+                                            AutoToolTipPrecision="1"
+                                            TickPlacement="None"
+                                            TickFrequency="1"
+                                            LargeChange="1"
+                                            SmallChange="0.1"
+                                            Orientation="Vertical" />
+                            <TextBlock MaxWidth="32" Text="{Binding Path=Zoom,ElementName=zoomctrlNav,StringFormat='{}{0:P0}'}" FontSize="10" FontWeight="Normal" HorizontalAlignment="Center" Margin="0,0,0,6"/>
+                            <ToggleButton Style="{StaticResource ToggleButtonStyle}" Content="Fill" IsChecked="{Binding Mode,ElementName=zoomctrlNav,Converter={StaticResource equalityConverter},ConverterParameter={x:Static Controls:ZoomControlModes.Fill}}" />
+                            <ToggleButton Style="{StaticResource ToggleButtonStyle}" Content="1:1" IsChecked="{Binding Mode,ElementName=zoomctrlNav,Converter={StaticResource equalityConverter},ConverterParameter={x:Static Controls:ZoomControlModes.Original}}" />
                         </StackPanel>
                     </Border>
-                    <graphxctrl:ZoomControl Grid.Column="1"  ZoomDeltaMultiplier="50" x:Name="zoomctrlNav">
+                    <graphxctrl:ZoomControl Grid.Column="1" ZoomDeltaMultiplier="50" x:Name="zoomctrlNav">
                         <model:GraphArea x:Name="AreaNav" />
                     </graphxctrl:ZoomControl>
                 </Grid>
