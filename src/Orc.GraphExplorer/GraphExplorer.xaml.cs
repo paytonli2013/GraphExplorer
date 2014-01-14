@@ -55,8 +55,8 @@ namespace Orc.GraphExplorer
             Area.VertexSelected += Area_VertexSelected;
             Area.EdgeSelected += Area_EdgeSelected;
 
-            AreaNav.GenerateGraphFinished += Area_RelayoutFinished;
-            Area.GenerateGraphFinished += Area_RelayoutFinished;
+            AreaNav.GenerateGraphFinished += (s, e) => Area_RelayoutFinished(s, e, zoomctrlNav);
+            Area.GenerateGraphFinished += (s, e) => Area_RelayoutFinished(s, e, zoomctrl);
 
             _viewmodel = new GraphExplorerViewmodel();
             _viewmodel.View = this;
@@ -79,9 +79,11 @@ namespace Orc.GraphExplorer
             };
         }
 
-        void Area_RelayoutFinished(object sender, EventArgs e)
+        void Area_RelayoutFinished(object sender, EventArgs e, ZoomControl zoom)
         {
             ShowAllEdgesLabels(sender as GraphArea, true);
+
+            FitToBounds(null, zoom);
         }
 
         private void ShowAllEdgesLabels(GraphArea area, bool show)
@@ -220,9 +222,9 @@ namespace Orc.GraphExplorer
 
             CreateGraphArea(AreaNav, historyItem.Vertexes, historyItem.Edges);
 
-            var dispatcher = AreaNav.Dispatcher;
+            //var dispatcher = AreaNav.Dispatcher;
 
-            FitToBounds(dispatcher, zoomctrlNav);
+            //FitToBounds(dispatcher, zoomctrlNav);
         }
 
         private void FitToBounds(System.Windows.Threading.Dispatcher dispatcher, ZoomControl zoom)
@@ -303,8 +305,8 @@ namespace Orc.GraphExplorer
 
             if (nav)
             {
-                ((OverlapRemovalParameters)area.DefaultOverlapRemovalAlgorithmParams).HorizontalGap = 300;
-                ((OverlapRemovalParameters)area.DefaultOverlapRemovalAlgorithmParams).VerticalGap = 150;
+                ((OverlapRemovalParameters)area.DefaultOverlapRemovalAlgorithmParams).HorizontalGap = 150;
+                ((OverlapRemovalParameters)area.DefaultOverlapRemovalAlgorithmParams).VerticalGap = 100;
             }
             else
             {
@@ -319,7 +321,8 @@ namespace Orc.GraphExplorer
             //This property sets async algorithms computation so methods like: Area.RelayoutGraph() and Area.GenerateGraph()
             //will run async with the UI thread. Completion of the specified methods can be catched by corresponding events:
             //Area.RelayoutFinished and Area.GenerateGraphFinished.
-            area.AsyncAlgorithmCompute = false;
+            area.AsyncAlgorithmCompute = true;
+
             //area.UseLayoutRounding = false;
             area.UseNativeObjectArrange = false;
         }
@@ -332,7 +335,7 @@ namespace Orc.GraphExplorer
 
             HookVertexEvent(Area);
 
-            FitToBounds(Area.Dispatcher, zoomctrl);
+            //FitToBounds(Area.Dispatcher, zoomctrl);
         }
 
         private void HookVertexEvent(GraphArea Area)

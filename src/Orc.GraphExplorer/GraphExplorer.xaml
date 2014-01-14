@@ -61,12 +61,7 @@
                     <graphxctrl:ZoomControl x:Name="zoomctrl" ZoomDeltaMultiplier="50" Grid.Column="1">
                         <model:GraphArea x:Name="Area"/>
                     </graphxctrl:ZoomControl>
-                                            
-                    <!--<zb:Zoombox Grid.Column="1" KeepContentInBounds="False" x:Name="zoomctrl">
-                        
-                    </zb:Zoombox>-->
                 </Grid>
-
             </TabItem>
             <TabItem Name="navTab" Visibility="Hidden" Padding="1">
                 <TabItem.Header>
