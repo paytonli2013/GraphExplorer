@@ -29,7 +29,7 @@
             <TextBox VerticalContentAlignment="Center" IsEnabled="False" Margin="2,6" Name="tbRelationships" Grid.Column="2"  Grid.Row="2"/>
             <Button Name="btnRelationship" Margin="2,6" Click="btnRelationship_Click" Content="..."  Grid.Column="3" Grid.Row="2" />
 
-            <Button Name="btnSave" Click="btnSave_Click" Grid.Column="2" Grid.RowSpan="2" Margin="2,20" Grid.Row="3" Grid.ColumnSpan="2" Height="28" Width="80" VerticalAlignment="Top" HorizontalAlignment="Right" Content="Save" />
+            <Button Foreground="White" Background="{DynamicResource AccentBrush}" Name="btnSave" Click="btnSave_Click" Grid.Column="2" Grid.RowSpan="2" Margin="2,20" Grid.Row="3" Grid.ColumnSpan="2" Height="28" Width="80" VerticalAlignment="Top" HorizontalAlignment="Right" Content="Save" />
         </Grid>
     </Grid>
 </UserControl>

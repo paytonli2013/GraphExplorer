@@ -207,34 +207,38 @@ namespace Orc.GraphExplorer
                 Properties = new ObservableCollection<PropertyViewmodel>();
 
             Properties.Add(new PropertyViewmodel("", "", this) { IsEditing = true });
+
+            IsExpanded = true;
         }
 
-        DelegateCommand _resetCommand;
+        DelegateCommand _deleteCommand;
 
-        public DelegateCommand ResetCommand
+        public DelegateCommand DeleteCommand
         {
             get
             {
-                if (_resetCommand == null)
-                    _resetCommand = new DelegateCommand(ExecReset, CanExecReset);
-                return _resetCommand;
+                if (_deleteCommand == null)
+                    _deleteCommand = new DelegateCommand(ExecDelete, CanExecDelete);
+                return _deleteCommand;
             }
         }
 
-        void ExecReset()
+        void ExecDelete()
         {
-            if (Properties == null)
+            if (Properties == null && Properties.Any(p => p.IsSelected))
                 return;
 
-            foreach (var vm in Properties)
+            var deleteList = Properties.Where(p => p.IsSelected).ToList();
+
+            foreach (var vm in deleteList)
             {
-                vm.Reset();
+                Properties.Remove(vm);
             }
         }
 
-        bool CanExecReset()
+        bool CanExecDelete()
         {
-            return true;
+            return Properties != null && Properties.Count > 0;
         }
 
         private void Submit()

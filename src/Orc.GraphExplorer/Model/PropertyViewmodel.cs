@@ -12,6 +12,18 @@ namespace Orc.GraphExplorer.Model
     {
         #region Properties
 
+        bool _isSelected;
+
+        public bool IsSelected
+        {
+            get { return _isSelected; }
+            set
+            {
+                _isSelected = value;
+                RaisePropertyChanged("IsSelected");
+            }
+        }
+
         bool _isEditing;
 
         public bool IsEditing
@@ -28,7 +40,7 @@ namespace Orc.GraphExplorer.Model
 
         public bool IsDirty
         {
-            get { return OriginalValue!=Value; }
+            get { return OriginalValue != Value; }
         }
 
         string _originalKey;
