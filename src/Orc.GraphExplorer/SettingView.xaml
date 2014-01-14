@@ -24,9 +24,9 @@
                     <RowDefinition Height="28"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Border Name="headerBackground" Background="{StaticResource NormalBrush}" />
-                <TextBlock FontSize="16" VerticalAlignment="Center" Margin="6,0" FontWeight="Bold" HorizontalAlignment="Left" Text="Settings"/>
-                <Button Style="{StaticResource CloseButtonStyle}" HorizontalAlignment="Right" Name="btnClose" Click="btnClose_Click" Height="28" Width="28"/>
+                <Border Name="headerBackground" />
+                <TextBlock Foreground="{StaticResource AccentBrush}" FontSize="16" VerticalAlignment="Center" Margin="6,0" FontWeight="Bold" HorizontalAlignment="Left" Text="Settings"/>
+                <Button Foreground="{StaticResource AccentBrush}" Style="{StaticResource CloseButtonStyle}" HorizontalAlignment="Right" Name="btnClose" Click="btnClose_Click" Height="22" Width="22"/>
                 <TabControl Grid.Row="1">
                     <TabItem Header="Config File Location" FontWeight="Bold">
                         <local:FilePicker SettingApplied="FileLocationSaved_Loaded"/>
