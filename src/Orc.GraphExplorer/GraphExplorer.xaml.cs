@@ -350,7 +350,7 @@ namespace Orc.GraphExplorer
 
         void vertex_IsExpandedChanged(object sender, EventArgs e, VertexControl vc)
         {
-            if (!((DataVertex)sender).IsExpanded)
+            if (!((DataVertex)sender).IsExpanded && tbtnCanDrag.IsChecked.HasValue&&tbtnCanDrag.IsChecked.Value)
             {
                 RunCodeInUiThread(() =>
                 {

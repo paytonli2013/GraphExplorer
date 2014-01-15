@@ -36,7 +36,8 @@ namespace Orc.GraphExplorer
             {
                 _isExpanded = value;
                 RaisePropertyChanged("IsExpanded");
-                FireIsExpandedChanged();
+                if (!_isExpanded && Properties != null && Properties.Count > 2)
+                    FireIsExpandedChanged();
             }
         }
 
@@ -105,8 +106,17 @@ namespace Orc.GraphExplorer
         public int Id { get; set; }
 
         Dictionary<string, string> _properties;
-
-        public ObservableCollection<PropertyViewmodel> Properties { get; set; }
+        ObservableCollection<PropertyViewmodel> propertiesVMs = null;
+        public ObservableCollection<PropertyViewmodel> Properties
+        {
+            get { return propertiesVMs; }
+            set
+            {
+                propertiesVMs = value;
+                RaisePropertyChanged("Properties");
+                DeleteCommand.RaiseCanExecuteChanged();
+            }
+        }
 
         [YAXDontSerialize]
         public ImageSource Icon { get; set; }
@@ -209,6 +219,7 @@ namespace Orc.GraphExplorer
             Properties.Add(new PropertyViewmodel("", "", this) { IsEditing = true });
 
             IsExpanded = true;
+            DeleteCommand.RaiseCanExecuteChanged();
         }
 
         DelegateCommand _deleteCommand;
@@ -234,6 +245,8 @@ namespace Orc.GraphExplorer
             {
                 Properties.Remove(vm);
             }
+
+            DeleteCommand.RaiseCanExecuteChanged();
         }
 
         bool CanExecDelete()
