@@ -1,4 +1,5 @@
-﻿using Microsoft.Practices.Prism.Commands;
+﻿using GraphX;
+using Microsoft.Practices.Prism.Commands;
 using Orc.GraphExplorer.Model;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,89 @@ namespace Orc.GraphExplorer
 {
     public class GraphExplorerViewmodel : NotificationObject
     {
+
+        #region Properties
+
+        private List<int> _selectedVertices = new List<int>();
+
+        bool _isInEditing;
+
+        public bool IsInEditing
+        {
+            get { return _isInEditing; }
+            set
+            {
+                if (_isInEditing != value)
+                {
+                    _isInEditing = value;
+                    _selectedVertices.Clear();
+                    UpdateIsInEditing(_isInEditing);
+                    if (_isInEditing)
+                        CanDrag = true;
+                    RaisePropertyChanged("IsInEditing");
+                }
+            }
+        }
+
+        private void UpdateIsInEditing(bool value)
+        {
+            if (View == null)
+                return;
+
+            var area = View.Area;
+            var highlightEnable = !value;
+            var highlighted = false;
+            foreach (var v in area.VertexList)
+            {
+                v.Key.IsEditing = value;
+                //if (value)
+                //{
+                //    v.Key.ChangedCommited += ChangedCommited;
+                //}
+                //else
+                //{
+                //    v.Key.ChangedCommited -= ChangedCommited;
+                //}
+
+                HighlightBehaviour.SetIsHighlightEnabled(v.Value, highlightEnable);
+                HighlightBehaviour.SetHighlighted(v.Value, highlighted);
+            }
+
+            foreach (var edge in area.EdgesList)
+            {
+                HighlightBehaviour.SetIsHighlightEnabled(edge.Value, highlightEnable);
+                HighlightBehaviour.SetHighlighted(edge.Value, highlighted);
+            }
+        }
+
+        bool _canDrag;
+
+        public bool CanDrag
+        {
+            get { return _canDrag; }
+            set
+            {
+                if (_canDrag != value)
+                {
+                    _canDrag = value;
+                    UpdateCanDrag(value);
+                    RaisePropertyChanged("CanDrag");
+                }
+            }
+        }
+
+        private void UpdateCanDrag(bool value)
+        {
+            if (View == null)
+                return;
+
+            var area = View.Area;
+            foreach (var item in area.VertexList)
+            {
+                DragBehaviour.SetIsDragEnabled(item.Value, value);
+            }
+            //throw new NotImplementedException();
+        }
 
         bool _hasUnCommitChange;
 
@@ -77,6 +161,8 @@ namespace Orc.GraphExplorer
             }
         }
 
+        #endregion
+
         //Summary
         //    constructor of GraphExplorerViewmodel
         public GraphExplorerViewmodel()
@@ -107,11 +193,14 @@ namespace Orc.GraphExplorer
         //    Commit changes to data source, after commit, clear undo/redo list
         public void Commit()
         {
+            _selectedVertices.Clear();
             _operations.Clear();
             _operationsRedo.Clear();
             UndoCommand.RaiseCanExecuteChanged();
             RedoCommand.RaiseCanExecuteChanged();
             HasChange = false;
+
+            IsInEditing = false;
         }
 
         #region Commands
@@ -124,7 +213,7 @@ namespace Orc.GraphExplorer
             {
                 if (_undoCommand == null)
                     _undoCommand = new DelegateCommand(ExecuteUndo, CanExecuteUndo);
-                return _undoCommand; 
+                return _undoCommand;
             }
         }
 
@@ -132,7 +221,7 @@ namespace Orc.GraphExplorer
         {
             var op = Operations.FirstOrDefault();
 
-            if (op == null||!op.IsUnDoable)
+            if (op == null || !op.IsUnDoable)
                 return;
 
             op.UnDo();
@@ -157,7 +246,7 @@ namespace Orc.GraphExplorer
             {
                 if (_redoCommand == null)
                     _redoCommand = new DelegateCommand(ExecuteRedo, CanExecuteRedo);
-                return _redoCommand; 
+                return _redoCommand;
             }
         }
 
@@ -180,6 +269,38 @@ namespace Orc.GraphExplorer
         bool CanExecuteRedo()
         {
             return HasRedoable;
+        }
+
+        public void CreateEdge(int fromId, int toId)
+        {
+            if (View == null)
+                return;
+
+            var area = View.Area;
+            var source = area.VertexList.Where(pair => pair.Key.Id == fromId).Select(pair => pair.Key).FirstOrDefault();
+            var target = area.VertexList.Where(pair => pair.Key.Id == toId).Select(pair => pair.Key).FirstOrDefault();
+            if (source == null || target == null)
+                return;
+
+            Do(new CreateEdgeOperation(area, source, target,
+                (e) =>
+                {
+                    //on vertex created
+                    //_selectedVertices.Add(v.Id);
+
+                    HighlightBehaviour.SetIsHighlightEnabled(e, false);
+                    HighlightBehaviour.SetHighlighted(e, false);
+
+                    HighlightBehaviour.SetHighlighted(area.VertexList[source], false);
+                    HighlightBehaviour.SetHighlighted(area.VertexList[target], false);
+
+                    //UpdateIsInEditing(true);
+                },
+                (e) =>
+                {
+                    //_selectedVertices.Remove(v.Id);
+                    //on vertex recreated
+                }));
         }
 
         #endregion

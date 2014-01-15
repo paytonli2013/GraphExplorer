@@ -50,8 +50,8 @@
                             <Button Height="28" Width="28" ToolTip="Save As Image" Name="btnExport" Style="{StaticResource ExportButtonStyle}" Click="btnExport_Click"/>
 
                             <Rectangle Fill="{StaticResource NormalBorderBrush}" Width="1" VerticalAlignment="Stretch" Margin="4"/>
-                            <ToggleButton Style="{StaticResource DragToggleButtonStyle}" Height="28" Width="28" ToolTip="Enable Drag" Name="tbtnCanDrag" Click="tbtnCanDrag_Click"/>
-                            <ToggleButton Style="{StaticResource EditToggleButtonStyle}" Height="28" Width="28" ToolTip="Enable Edit Mode" Name="tbtnCanEdit" Click="tbtnCanEdit_Click"/>
+                            <ToggleButton Style="{StaticResource DragToggleButtonStyle}" IsChecked="{Binding CanDrag,Mode=TwoWay}" Height="28" Width="28" ToolTip="Enable Drag" Name="tbtnCanDrag"/>
+                            <ToggleButton Style="{StaticResource EditToggleButtonStyle}" IsChecked="{Binding IsInEditing}" Height="28" Width="28" ToolTip="Enable Edit Mode" Name="tbtnCanEdit" Click="tbtnCanEdit_Click"/>
                             <StackPanel Orientation="Horizontal" Name="editPanel" Visibility="{Binding IsChecked,ElementName=tbtnCanEdit,Converter={StaticResource BoolToVisibilityConverter}}">
                                 <Button Height="28" ToolTip="Create Link" Name="tbnNewEdge" Click="tbnNewEdge_Click" Width="28" Style="{StaticResource EdgeButtonStyle}"/>
                                 <Button Height="28" ToolTip="Create Node" Name="tbnNewNode" Click="tbnNewNode_Click"  Width="28" Style="{StaticResource VertexButtonStyle}"/>

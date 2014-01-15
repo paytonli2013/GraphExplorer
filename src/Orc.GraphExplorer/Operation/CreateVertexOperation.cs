@@ -9,6 +9,9 @@ namespace Orc.GraphExplorer
 {
     public class CreateVertexOperation : VertexOperation
     {
+
+        const double GapX = 150;
+        const double GapY = 150;
         const string CreateVertex = "Create Vertex";
         public override string Sammary
         {
@@ -18,14 +21,22 @@ namespace Orc.GraphExplorer
         public override void Do()
         {
             _graph.Graph.AddVertex(_vertex);
-            _vCtrl= new VertexControl(_vertex);
+            _vCtrl = new VertexControl(_vertex);
             _graph.AddVertex(_vertex, _vCtrl);
+
+            //ArrangeVertexPosition();
 
             if (_callback != null)
             {
-                _callback.Invoke(_vertex,_vCtrl);
+                _callback.Invoke(_vertex, _vCtrl);
             }
         }
+
+        //private void ArrangeVertexPosition()
+        //{
+        //    double maxY
+        //    //throw new NotImplementedException();
+        //}
 
         public override void UnDo()
         {

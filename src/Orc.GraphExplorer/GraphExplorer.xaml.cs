@@ -128,8 +128,7 @@ namespace Orc.GraphExplorer
         {
             if (args.MouseArgs.LeftButton == MouseButtonState.Pressed)
             {
-                if (DragBehaviour.GetIsDragging(args.VertexControl)) return;
-
+                //if (DragBehaviour.GetIsDragging(args.VertexControl)) return;
                 SelectVertex(args.VertexControl);
             }
             else if (args.MouseArgs.RightButton == MouseButtonState.Pressed && IsInEditMode)
@@ -592,18 +591,6 @@ namespace Orc.GraphExplorer
             foreach (var item in area.VertexList)
             {
                 DragBehaviour.SetIsDragEnabled(item.Value, canDrag);
-
-                //if (canDrag)
-                //{
-                //    item.Value.EventOptions.PositionChangeNotification = true;
-                //    item.Value.PositionChanged -= Value_PositionChanged;
-                //    item.Value.PositionChanged += Value_PositionChanged;
-                //}
-                //else
-                //{
-                //    item.Value.EventOptions.PositionChangeNotification = false;
-                //    item.Value.PositionChanged -= Value_PositionChanged;
-                //}
             }
             //throw new NotImplementedException();
         }
@@ -641,24 +628,23 @@ namespace Orc.GraphExplorer
             {
                 _selectedVertices.Remove(v.Id);
                 HighlightBehaviour.SetHighlighted(vc, false);
-                DragBehaviour.SetIsTagged(vc, false);
+                //DragBehaviour.SetIsTagged(vc, false);
             }
             else
             {
                 _selectedVertices.Add(v.Id);
                 HighlightBehaviour.SetHighlighted(vc, true);
-                DragBehaviour.SetIsTagged(vc, true);
+                //DragBehaviour.SetIsTagged(vc, true);
             }
         }
 
         private void tbtnCanEdit_Click(object sender, RoutedEventArgs e)
         {
-            if (tbtnCanDrag.IsChecked.HasValue && tbtnCanDrag.IsChecked.Value)
-            {
-                tbtnCanDrag.IsChecked = false;
-                UpdateCanDrag(Area, tbtnCanDrag.IsChecked.Value);
-            }
-
+            //if (tbtnCanDrag.IsChecked.HasValue && tbtnCanDrag.IsChecked.Value)
+            //{
+            //    tbtnCanDrag.IsChecked = false;
+            //    UpdateCanDrag(Area, tbtnCanDrag.IsChecked.Value);
+            //}
             UpdateIsInEditMode(Area.VertexList, tbtnCanEdit.IsChecked.Value);
             UpdateHighlightBehaviour(true);
         }
@@ -771,8 +757,7 @@ namespace Orc.GraphExplorer
             {
                 if (_selectedVertices.Count == 2)
                 {
-                    CreateEdge(_selectedVertices[0], _selectedVertices[1], Area);
-
+                    _viewmodel.CreateEdge(_selectedVertices[0], _selectedVertices[1]);
                     //FitToBounds(Area.Dispatcher, zoomctrl);
                 }
                 else
@@ -805,7 +790,7 @@ namespace Orc.GraphExplorer
                 {
                     _selectedVertices.Add(v.Id);
 
-                    area.RelayoutGraph(true);
+                    //area.RelayoutGraph(true);
 
                     UpdateHighlightBehaviour(false);
 
@@ -813,6 +798,15 @@ namespace Orc.GraphExplorer
                     {
                         var localvc = area.VertexList.Where(pair => pair.Key.Id == selectedV).Select(pair => pair.Value).FirstOrDefault();
                         HighlightBehaviour.SetHighlighted(localvc, true);
+                    }
+
+                    if (tbtnCanDrag.IsChecked.Value)
+                    {
+                        DragBehaviour.SetIsDragEnabled(vc, true);
+                    }
+                    else
+                    {
+                        DragBehaviour.SetIsDragEnabled(vc, false);
                     }
                 },
                 (v) =>
@@ -838,6 +832,7 @@ namespace Orc.GraphExplorer
                 {
                     //on vertex created
                     //_selectedVertices.Add(v.Id);
+
                     HighlightBehaviour.SetIsHighlightEnabled(e, false);
                     HighlightBehaviour.SetHighlighted(e, false);
 
