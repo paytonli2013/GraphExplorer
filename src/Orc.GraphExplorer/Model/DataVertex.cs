@@ -13,7 +13,7 @@ using System.Collections.ObjectModel;
 
 namespace Orc.GraphExplorer
 {
-    public class DataVertex : VertexBase, INotifyPropertyChanged, IDisposable
+    public class DataVertex : VertexBase, INotifyPropertyChanged, IDisposable,IObservable<IOperation>
     {
         bool isSelected;
 
@@ -90,6 +90,9 @@ namespace Orc.GraphExplorer
             foreach (var vm in Properties)
             {
                 vm.IsEditing = isEditing;
+
+                if (!isEditing)
+                    vm.IsSelected = false;
             }
         }
 
@@ -109,7 +112,12 @@ namespace Orc.GraphExplorer
         ObservableCollection<PropertyViewmodel> propertiesVMs = null;
         public ObservableCollection<PropertyViewmodel> Properties
         {
-            get { return propertiesVMs; }
+            get 
+            {
+                if (propertiesVMs == null)
+                    propertiesVMs = new ObservableCollection<PropertyViewmodel>();
+                return propertiesVMs;
+            }
             set
             {
                 propertiesVMs = value;
@@ -170,7 +178,9 @@ namespace Orc.GraphExplorer
 
         private static ObservableCollection<PropertyViewmodel> GenerateProperties(Dictionary<string, string> dictionary, DataVertex data)
         {
-            var pvs = from pair in dictionary select new PropertyViewmodel(pair.Key, pair.Value, data);
+            int index = 0;
+
+            var pvs = from pair in dictionary select new PropertyViewmodel(index++,pair.Key, pair.Value, data);
 
             return new ObservableCollection<PropertyViewmodel>(pvs);
         }
@@ -213,13 +223,74 @@ namespace Orc.GraphExplorer
 
         void ExecAdd()
         {
+            //AddProperty(NewProperty());
+
+            var apo = new AddPropertyOperation(this);
+
+            Observe(apo);
+        }
+
+        private PropertyViewmodel NewProperty()
+        {
+            return new PropertyViewmodel(GetIndex(), "", "", this) { IsEditing = true };
+        }
+
+        private int GetIndex()
+        {
+            return Properties.Count;
+        }
+
+        public PropertyViewmodel AddProperty(PropertyViewmodel property = null)
+        {
             if (Properties == null)
                 Properties = new ObservableCollection<PropertyViewmodel>();
 
-            Properties.Add(new PropertyViewmodel("", "", this) { IsEditing = true });
+            if (property == null)
+                property = NewProperty();
+
+            Properties.Add(property);
 
             IsExpanded = true;
             DeleteCommand.RaiseCanExecuteChanged();
+
+            return property;
+        }
+
+        public void AddPropertyRange(IEnumerable<PropertyViewmodel> properties)
+        {
+            foreach (var p in properties)
+            {
+                Properties.Add(p);
+            }
+
+            Properties = new ObservableCollection<PropertyViewmodel>(Properties.OrderBy(p=>p.Index));
+        }
+
+        public IEnumerable<PropertyViewmodel> RemoveSelectedProperties()
+        {
+            if (Properties == null && Properties.Any(p => p.IsSelected))
+                return null;
+
+            List<PropertyViewmodel> list = new List<PropertyViewmodel>();
+
+            var deleteList = Properties.Where(p => p.IsSelected).ToList();
+
+            foreach (var p in deleteList)
+            {
+                Properties.Remove(p);
+                list.Add(p);
+            }
+
+            DeleteCommand.RaiseCanExecuteChanged();
+
+            return list;
+        }
+
+        public PropertyViewmodel RemoveProperty(PropertyViewmodel property) 
+        {
+            Properties.Remove(property);
+
+            return property;
         }
 
         DelegateCommand _deleteCommand;
@@ -236,17 +307,10 @@ namespace Orc.GraphExplorer
 
         void ExecDelete()
         {
-            if (Properties == null && Properties.Any(p => p.IsSelected))
-                return;
+            var dpo = new DeletePropertyOperation(this);
 
-            var deleteList = Properties.Where(p => p.IsSelected).ToList();
-
-            foreach (var vm in deleteList)
-            {
-                Properties.Remove(vm);
-            }
-
-            DeleteCommand.RaiseCanExecuteChanged();
+            Observe(dpo);
+            //RemoveSelectedProperties();
         }
 
         bool CanExecDelete()
@@ -331,5 +395,48 @@ namespace Orc.GraphExplorer
             //if (_maxId <= this.Id+1)
             //    _maxId--;
         }
+
+        #region IObservable<IOperation>
+
+        Dictionary<Guid, IObserver<IOperation>> _observerDic = new Dictionary<Guid, IObserver<IOperation>>();
+
+        public IDisposable Subscribe(IObserver<IOperation> observer)
+        {
+            var id = Guid.NewGuid();
+            _observerDic.Add(id, observer);
+            return new VertexObserverable(this, id);
+        }
+
+        public class VertexObserverable : IDisposable
+        {
+            DataVertex _vertex;
+            Guid _observerId;
+            public VertexObserverable(DataVertex vertex, Guid observerId) 
+            {
+                _vertex = vertex;
+                _observerId = observerId;
+            }
+
+            public void Dispose()
+            {
+                _vertex.RemoveObserver(_observerId);
+                _vertex = null;
+            }
+        }
+
+        private void RemoveObserver(Guid observerId)
+        {
+            _observerDic.Remove(observerId);
+        }
+
+        private void Observe(IOperation op)
+        {
+            foreach (var observer in _observerDic.Values)
+            {
+                observer.OnNext(op);
+            }
+        }
+
+        #endregion
     }
 }

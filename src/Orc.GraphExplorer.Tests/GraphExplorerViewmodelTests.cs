@@ -12,7 +12,7 @@ namespace Orc.GraphExplorer.Tests
     public class GraphExplorerViewmodelTests
     {
         [TestMethod]
-        public void GraphExplorerViewmodel_Constructor_Test()
+        public void Constructor_Test()
         {
             var graphVM = new GraphExplorerViewmodel();
 
@@ -25,7 +25,7 @@ namespace Orc.GraphExplorer.Tests
         }
 
         [TestMethod]
-        public void GraphExplorerViewmodel_Do_CreateVertex_Operation_Test()
+        public void Do_CreateVertex_Operation_Test()
         {
             var graphVM = new GraphExplorerViewmodel();
 
@@ -76,7 +76,7 @@ namespace Orc.GraphExplorer.Tests
         }
 
         [TestMethod]
-        public void GraphExplorerViewmodel_Commit_Operation_Test()
+        public void Commit_Operation_Test()
         {
             var op1 = new MockOperation();
             var op2 = new MockOperation();
@@ -99,6 +99,58 @@ namespace Orc.GraphExplorer.Tests
 
             Assert.IsFalse(vm.HasUndoable);
             Assert.AreEqual(vm.Operations.Count, 0);
+        }
+
+        [TestMethod]
+        public void Observe_Vertex_AddPropertyOperation_Test()
+        {
+            var vertex = new DataVertex();
+
+            var vm = new GraphExplorerViewmodel();
+
+            vm.OnVertexLoaded(new DataVertex[] { vertex }, true);
+
+            vertex.AddCommand.Execute();
+
+            Assert.IsTrue(vm.HasUndoable);
+            Assert.AreEqual(vertex.Properties.Count, 1);
+
+            vm.UndoCommand.Execute();
+
+            Assert.IsTrue(vm.HasRedoable);
+            Assert.AreEqual(vertex.Properties.Count, 0);
+
+            vm.RedoCommand.Execute();
+
+            Assert.IsTrue(vm.HasUndoable);
+            Assert.AreEqual(vertex.Properties.Count, 1);
+        }
+
+        [TestMethod]
+        public void Observe_Vertex_DeletePropertyOperation_Test()
+        {
+            var vertex = new DataVertex();
+
+            vertex.AddProperty(new Model.PropertyViewmodel(0, "", "", vertex) { IsSelected = true});
+
+            var vm = new GraphExplorerViewmodel();
+
+            vm.OnVertexLoaded(new DataVertex[] { vertex }, true);
+
+            vertex.DeleteCommand.Execute();
+
+            Assert.IsTrue(vm.HasUndoable);
+            Assert.AreEqual(vertex.Properties.Count, 0);
+
+            vm.UndoCommand.Execute();
+
+            Assert.IsTrue(vm.HasRedoable);
+            Assert.AreEqual(vertex.Properties.Count, 1);
+
+            vm.RedoCommand.Execute();
+
+            Assert.IsTrue(vm.HasUndoable);
+            Assert.AreEqual(vertex.Properties.Count, 0);
         }
     }
 }

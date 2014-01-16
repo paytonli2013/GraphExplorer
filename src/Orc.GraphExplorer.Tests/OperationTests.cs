@@ -246,5 +246,78 @@ namespace Orc.GraphExplorer.Tests
             Assert.IsFalse(graph.EdgesList.Any(e => e.Key == e1));
             Assert.IsFalse(graph.EdgesList.Any(e => e.Key == e2));
         }
+
+        [TestMethod]
+        public void Vertex_AddPropertyOperation_Test()
+        {
+            var vertex = new DataVertex();
+
+            var apo = new AddPropertyOperation(vertex);
+
+            apo.Do();
+
+            Assert.IsNotNull(apo.Property);
+            Assert.AreEqual(vertex.Properties.Count, 1);
+
+            apo.UnDo();
+
+            Assert.AreEqual(vertex.Properties.Count, 0);
+        }
+
+        [TestMethod]
+        public void Vertex_DeletePropertyOperation_Test()
+        {
+            var vertex = new DataVertex();
+            var p1 = new Model.PropertyViewmodel(1,"p1","p1",vertex);
+            vertex.Properties.Add(p1);
+            var p2 = new Model.PropertyViewmodel(2, "p2", "p2", vertex) { IsSelected = true};
+            vertex.Properties.Add(p2);
+            var p3 = new Model.PropertyViewmodel(3, "p3", "p3", vertex) { IsSelected = true};
+            vertex.Properties.Add(p3);
+
+            var dpo = new DeletePropertyOperation(vertex);
+
+            dpo.Do();
+
+            Assert.AreEqual(vertex.Properties.Count, 1);
+
+            dpo.UnDo();
+
+            Assert.AreEqual(vertex.Properties.Count, 3);
+            Assert.AreEqual(vertex.Properties[0], p1);
+            Assert.AreEqual(vertex.Properties[1], p2);
+            Assert.AreEqual(vertex.Properties[2], p3);
+        }
+
+        [TestMethod]
+        public void Vertex_Set_Of_DeleteAddOperatrion_Test()
+        {
+            var vertex = new DataVertex();
+
+            var p1 = new Model.PropertyViewmodel(1, "p1", "p1", vertex);
+            vertex.Properties.Add(p1);
+            var p2 = new Model.PropertyViewmodel(2, "p2", "p2", vertex) { IsSelected = true };
+            vertex.Properties.Add(p2);
+            var p3 = new Model.PropertyViewmodel(3, "p3", "p3", vertex) { IsSelected = true };
+            vertex.Properties.Add(p3);
+
+            var apo = new AddPropertyOperation(vertex);
+            var dpo = new DeletePropertyOperation(vertex);
+
+            apo.Do();
+            dpo.Do();
+
+            Assert.AreEqual(vertex.Properties.Count, 2);
+            Assert.AreEqual(vertex.Properties[0], p1);
+            Assert.AreEqual(vertex.Properties[1], apo.Property);
+
+            dpo.UnDo();
+            apo.UnDo();
+
+            Assert.AreEqual(vertex.Properties.Count, 3);
+            Assert.AreEqual(vertex.Properties[0], p1);
+            Assert.AreEqual(vertex.Properties[1], p2);
+            Assert.AreEqual(vertex.Properties[2], p3);
+        }
     }
 }

@@ -335,6 +335,7 @@ namespace Orc.GraphExplorer
 
             HookVertexEvent(Area);
 
+            _viewmodel.OnVertexLoaded(Vertexes);
             //FitToBounds(Area.Dispatcher, zoomctrl);
         }
 

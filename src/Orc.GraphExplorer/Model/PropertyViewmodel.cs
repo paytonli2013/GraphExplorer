@@ -12,6 +12,13 @@ namespace Orc.GraphExplorer.Model
     {
         #region Properties
 
+        int _index;
+
+        public int Index
+        {
+            get { return _index; }
+        }
+
         bool _isSelected;
 
         public bool IsSelected
@@ -92,8 +99,9 @@ namespace Orc.GraphExplorer.Model
 
         #endregion
 
-        public PropertyViewmodel(string key, string value, DataVertex data)
+        public PropertyViewmodel(int index,string key, string value, DataVertex data)
         {
+            _index = index;
             _originalKey = _key = key;
             _value = _originalValue = value;
             _data = data;

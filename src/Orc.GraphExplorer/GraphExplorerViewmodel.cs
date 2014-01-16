@@ -8,9 +8,8 @@ using System.Text;
 
 namespace Orc.GraphExplorer
 {
-    public class GraphExplorerViewmodel : NotificationObject
+    public class GraphExplorerViewmodel : NotificationObject ,IObserver<IOperation>
     {
-
         #region Properties
 
         private List<int> _selectedVertices = new List<int>();
@@ -301,6 +300,39 @@ namespace Orc.GraphExplorer
                     //_selectedVertices.Remove(v.Id);
                     //on vertex recreated
                 }));
+        }
+
+        #endregion
+
+        #region IObserver<IOperation>
+
+        public void OnCompleted()
+        {
+            //throw new NotImplementedException();
+        }
+
+        public void OnError(Exception error)
+        {
+            //throw new NotImplementedException();
+        }
+
+        public void OnNext(IOperation value)
+        {
+            //throw new NotImplementedException();
+            Do(value);
+        }
+
+        List<IDisposable> _observers = new List<IDisposable>();
+
+        public void OnVertexLoaded(IEnumerable<DataVertex> vertexes,bool clearHistory = false)
+        {
+            if (clearHistory)
+                _observers.Clear();
+
+            foreach (var vertex in vertexes)
+            {
+                _observers.Add(vertex.Subscribe(this));
+            }
         }
 
         #endregion

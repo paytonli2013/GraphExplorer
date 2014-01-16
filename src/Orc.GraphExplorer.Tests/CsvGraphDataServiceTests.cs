@@ -121,9 +121,9 @@ namespace Orc.GraphExplorer.Tests
             var listV = new ObservableCollection<Model.PropertyViewmodel>();
             item1.Properties = listV;
 
-            listV.Add(new Model.PropertyViewmodel("First Name", "Payton", item1));
-            listV.Add(new Model.PropertyViewmodel("Last Name", "Li", item1));
-            listV.Add(new Model.PropertyViewmodel("Age", "29", item1));
+            listV.Add(new Model.PropertyViewmodel(1,"First Name", "Payton", item1));
+            listV.Add(new Model.PropertyViewmodel(2,"Last Name", "Li", item1));
+            listV.Add(new Model.PropertyViewmodel(3,"Age", "29", item1));
 
             list.Add(item1);
 
@@ -183,9 +183,9 @@ namespace Orc.GraphExplorer.Tests
             var list = new ObservableCollection<Model.PropertyViewmodel>();
             item1.Properties = list;
 
-            list.Add(new Model.PropertyViewmodel("First Name", "Payton", item1));
-            list.Add(new Model.PropertyViewmodel("Last Name", "Li", item1));
-            list.Add(new Model.PropertyViewmodel("Age", "29", item1));
+            list.Add(new Model.PropertyViewmodel(1,"First Name", "Payton", item1));
+            list.Add(new Model.PropertyViewmodel(2,"Last Name", "Li", item1));
+            list.Add(new Model.PropertyViewmodel(3,"Age", "29", item1));
 
             service.UpdateVertex(item1, (r,data, error) =>
             {

@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Orc.GraphExplorer.Tests.Mock;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,5 +42,24 @@ namespace Orc.GraphExplorer.Tests
             Assert.AreEqual(vertex.Properties.Count, 2);
         }
 
+        [TestMethod]
+        public void DataVertex_Observerable_Test()
+        {
+            var observer = new MockObserver();
+
+            var vertex = new DataVertex();
+
+            var dispose = vertex.Subscribe(observer);
+
+            vertex.AddCommand.Execute();
+
+            Assert.AreEqual(observer.Operations.Count, 1);
+
+            dispose.Dispose();
+
+            vertex.AddCommand.Execute();
+
+            Assert.AreEqual(observer.Operations.Count, 1);
+        }
     }
 }
