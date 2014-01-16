@@ -1,5 +1,6 @@
 ﻿using GraphX;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Orc.GraphExplorer.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -318,6 +319,40 @@ namespace Orc.GraphExplorer.Tests
             Assert.AreEqual(vertex.Properties[0], p1);
             Assert.AreEqual(vertex.Properties[1], p2);
             Assert.AreEqual(vertex.Properties[2], p3);
+        }
+
+        [TestMethod]
+        public void EditValuePropertyOperation_Test() 
+        {
+            var vertex = new DataVertex();
+            var property = new PropertyViewmodel(1,"key","value",vertex);
+            vertex.AddProperty(property);
+            var evpo = new EditValuePropertyOperation(property,"value changed");
+
+            evpo.Do();
+
+            Assert.AreEqual(property.Value, "value changed");
+
+            evpo.UnDo();
+                
+            Assert.AreEqual(property.Value, "value");
+        }
+
+        [TestMethod]
+        public void EditKeyPropertyOperation_Test()
+        {
+            var vertex = new DataVertex();
+            var property = new PropertyViewmodel(1, "key", "value", vertex);
+            vertex.AddProperty(property);
+            var ekpo = new EditKeyPropertyOperation(property, "key changed");
+
+            ekpo.Do();
+
+            Assert.AreEqual(property.Key, "key changed");
+
+            ekpo.UnDo();
+
+            Assert.AreEqual(property.Key, "key");
         }
     }
 }

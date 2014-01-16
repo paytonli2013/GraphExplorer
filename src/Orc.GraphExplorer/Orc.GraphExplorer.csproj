@@ -92,6 +92,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Converter\BoolToVisibilityConverter.cs" />
+    <Compile Include="Operation\EditValuePropertyOperation.cs" />
+    <Compile Include="Operation\EditKeyPropertyOperation.cs" />
     <Compile Include="Operation\AddPropertyOperation.cs" />
     <Compile Include="Operation\DeleteEdgeOperation.cs" />
     <Compile Include="Operation\DeletePropertyOperation.cs" />

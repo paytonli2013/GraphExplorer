@@ -13,7 +13,7 @@ using System.Collections.ObjectModel;
 
 namespace Orc.GraphExplorer
 {
-    public class DataVertex : VertexBase, INotifyPropertyChanged, IDisposable,IObservable<IOperation>
+    public class DataVertex : VertexBase, INotifyPropertyChanged, IDisposable,IObservable<IOperation>,IObserver<IOperation>
     {
         bool isSelected;
 
@@ -435,6 +435,26 @@ namespace Orc.GraphExplorer
             {
                 observer.OnNext(op);
             }
+        }
+
+        #endregion
+
+        #region IObserver<IOperation>
+
+        public void OnCompleted()
+        {
+            //throw new NotImplementedException();
+        }
+
+        public void OnError(Exception error)
+        {
+            //throw new NotImplementedException();
+        }
+
+        public void OnNext(IOperation value)
+        {
+            Observe(value);
+            //throw new NotImplementedException();
         }
 
         #endregion

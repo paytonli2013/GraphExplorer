@@ -8,7 +8,7 @@ using System.Windows;
 
 namespace Orc.GraphExplorer.Model
 {
-    public class PropertyViewmodel : NotificationObject
+    public class PropertyViewmodel : NotificationObject, IObservable<IOperation>,IDisposable
     {
         #region Properties
 
@@ -64,8 +64,7 @@ namespace Orc.GraphExplorer.Model
             get { return _key; }
             set
             {
-                _key = value;
-                RaisePropertyChanged("Key");
+                Observe(new EditKeyPropertyOperation(this, value));
             }
         }
 
@@ -76,8 +75,8 @@ namespace Orc.GraphExplorer.Model
             get { return _value; }
             set
             {
-                _value = value;
-                RaisePropertyChanged("Value");
+                Observe(new EditValuePropertyOperation(this,value));
+
                 RaisePropertyChanged("IsDirty");
             }
         }
@@ -96,6 +95,7 @@ namespace Orc.GraphExplorer.Model
         }
 
         DataVertex _data;
+        IDisposable _dispose;
 
         #endregion
 
@@ -105,6 +105,7 @@ namespace Orc.GraphExplorer.Model
             _originalKey = _key = key;
             _value = _originalValue = value;
             _data = data;
+            _dispose = this.Subscribe(_data);
         }
 
         public void Reset()
@@ -116,5 +117,70 @@ namespace Orc.GraphExplorer.Model
         {
             OriginalValue = Value;
         }
+
+        #region IObservable<IOperation>
+
+        Dictionary<Guid, IObserver<IOperation>> _observerDic = new Dictionary<Guid, IObserver<IOperation>>();
+
+        public IDisposable Subscribe(IObserver<IOperation> observer)
+        {
+            var id = Guid.NewGuid();
+            _observerDic.Add(id, observer);
+            return new PropertyObserverable(this, id);
+        }
+
+        public class PropertyObserverable : IDisposable
+        {
+            PropertyViewmodel _property;
+            Guid _observerId;
+            public PropertyObserverable(PropertyViewmodel property, Guid observerId)
+            {
+                _property = property;
+                _observerId = observerId;
+            }
+
+            public void Dispose()
+            {
+                _property.RemoveObserver(_observerId);
+                _property = null;
+            }
+        }
+
+        private void RemoveObserver(Guid observerId)
+        {
+            _observerDic.Remove(observerId);
+        }
+
+        private void Observe(IOperation op)
+        {
+            foreach (var observer in _observerDic.Values)
+            {
+                observer.OnNext(op);
+            }
+        }
+
+        public Tuple<string,string> UpdateKey(string key)
+        {
+            var oriVel = _key;
+            _key = key;
+            RaisePropertyChanged("Key");
+            return new Tuple<string, string>(oriVel, _key);
+        }
+
+        public Tuple<string, string> UpdateValue(string value)
+        {
+            var oriVel = _value;
+            _value = value;
+            RaisePropertyChanged("Value");
+            return new Tuple<string, string>(oriVel, _value);
+        }
+        #endregion
+
+        #region IDisposable
+        public void Dispose()
+        {
+            _dispose.Dispose();
+        }
+        #endregion
     }
 }

@@ -1397,8 +1397,8 @@
                                                         <ColumnDefinition Width="100"/>
                                                     </Grid.ColumnDefinitions>
                                                     <CheckBox Height="28" Width="28" VerticalAlignment="Center" VerticalContentAlignment="Center" IsChecked="{Binding IsSelected,Mode=TwoWay}"/>
-                                                    <TextBox Margin="0,0,1,0" Grid.Column="1" HorizontalAlignment="Stretch" Text="{Binding Key,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></TextBox>
-                                                    <TextBox HorizontalAlignment="Stretch" Text="{Binding Value,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Grid.Column="2"></TextBox>
+                                                    <TextBox Margin="0,0,1,0" Grid.Column="1" HorizontalAlignment="Stretch" Text="{Binding Key,Mode=TwoWay,UpdateSourceTrigger=Default}"></TextBox>
+                                                    <TextBox HorizontalAlignment="Stretch" Text="{Binding Value,Mode=TwoWay,UpdateSourceTrigger=Default}" Grid.Column="2"></TextBox>
                                                 </Grid>
                                             </Grid>
                                         </DataTemplate>
