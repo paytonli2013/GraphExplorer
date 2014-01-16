@@ -16,7 +16,7 @@ namespace Orc.GraphExplorer
 
         public override void Do()
         {
-            Property = _vertex.AddProperty();
+            Property = _vertex.AddProperty(Property);
         }
 
         public override void UnDo()
