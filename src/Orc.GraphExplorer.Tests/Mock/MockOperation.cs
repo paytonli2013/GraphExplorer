@@ -54,6 +54,12 @@ namespace Orc.GraphExplorer.Tests.Mock
             set { isUnDoable = value; }
         }
 
+        public Status Status
+        {
+            get;
+            protected set;
+        }
+
         bool isDisposed;
         public void Dispose()
         {

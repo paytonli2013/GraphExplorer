@@ -1435,28 +1435,31 @@
         </Setter>
 
         <!-- VERTEX DRAGGING CONTROL -->
-        <Setter Property="gxl:DragBehaviour.IsDragEnabled"
+                        <Setter Property="gxl:DragBehaviour.IsDragEnabled"
                 Value="False" />
-        <Setter Property="gxl:DragBehaviour.UpdateEdgesOnMove"
+                        <Setter Property="gxl:DragBehaviour.UpdateEdgesOnMove"
                 Value="True" />
+                        <Setter Property="gxl:DragBehaviour.IsDragging"
+                Value="{Binding IsDragging,Mode=OneWayToSource}" />
 
-        <Setter Property="gxl:HighlightBehaviour.IsHighlightEnabled"
+                        <Setter Property="gxl:HighlightBehaviour.IsHighlightEnabled"
                 Value="True" />
-        <Setter Property="gxl:HighlightBehaviour.HighlightControl"
+                        <Setter Property="gxl:HighlightBehaviour.HighlightControl"
                 Value="VertexAndEdge" />
-        <Setter Property="gxl:HighlightBehaviour.HighlightEdges" 
+                        <Setter Property="gxl:HighlightBehaviour.HighlightEdges" 
                 Value="All"/>
-
-        <Style.Triggers>
-            <Trigger Property="gxl:HighlightBehaviour.Highlighted" Value="True">
-                <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
-                <Setter Property="BorderThickness" Value="2"/>
-            </Trigger>
-            <Trigger Property="gxl:HighlightBehaviour.Highlighted" Value="False">
-                <Setter Property="BorderBrush" Value="{StaticResource NormalBorderBrush}"/>
-                <Setter Property="BorderThickness" Value="1"/>
-            </Trigger>
-        </Style.Triggers>
+                        <Setter Property="gxl:GraphAreaBase.FinalX" Value="{Binding X,Mode=OneWayToSource}"/>
+                        <Setter Property="gxl:GraphAreaBase.FinalY" Value="{Binding Y,Mode=OneWayToSource}"/>
+                        <Style.Triggers>
+                            <Trigger Property="gxl:HighlightBehaviour.Highlighted" Value="True">
+                                <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                                <Setter Property="BorderThickness" Value="2"/>
+                            </Trigger>
+                            <Trigger Property="gxl:HighlightBehaviour.Highlighted" Value="False">
+                                <Setter Property="BorderBrush" Value="{StaticResource NormalBorderBrush}"/>
+                                <Setter Property="BorderThickness" Value="1"/>
+                            </Trigger>
+                        </Style.Triggers>
     </Style>
 
     <!--EDGE LABLE CONTROL -->

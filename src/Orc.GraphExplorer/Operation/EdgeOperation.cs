@@ -68,5 +68,11 @@ namespace Orc.GraphExplorer
             _undoCallback = null;
             _graph = null;
         }
+
+        public Status Status
+        {
+            get;
+            protected set;
+        }
     }
 }

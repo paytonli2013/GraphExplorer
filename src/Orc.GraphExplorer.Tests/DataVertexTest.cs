@@ -31,15 +31,19 @@ namespace Orc.GraphExplorer.Tests
         [TestMethod]
         public void DataVertex_AddCommand_Test()
         {
+            var observer = new MockObserver();
+
             var vertex = new DataVertex();
 
-            vertex.AddCommand.Execute();
-
-            Assert.AreEqual(vertex.Properties.Count, 1);
+            vertex.Subscribe(observer);
 
             vertex.AddCommand.Execute();
 
-            Assert.AreEqual(vertex.Properties.Count, 2);
+            Assert.AreEqual(observer.Operations.Count, 1);
+
+            vertex.AddCommand.Execute();
+
+            Assert.AreEqual(observer.Operations.Count, 2);
         }
 
         [TestMethod]

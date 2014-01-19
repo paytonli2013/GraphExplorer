@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Orc.GraphExplorer
 {
-    public class GraphExplorerViewmodel : NotificationObject ,IObserver<IOperation>
+    public class GraphExplorerViewmodel : NotificationObject, IObserver<IOperation>
     {
         #region Properties
 
@@ -182,6 +182,7 @@ namespace Orc.GraphExplorer
             {
                 v.Dispose();
             }
+
             _operationsRedo.Clear();
 
             UndoCommand.RaiseCanExecuteChanged();
@@ -324,7 +325,7 @@ namespace Orc.GraphExplorer
 
         List<IDisposable> _observers = new List<IDisposable>();
 
-        public void OnVertexLoaded(IEnumerable<DataVertex> vertexes,bool clearHistory = false)
+        public void OnVertexLoaded(IEnumerable<DataVertex> vertexes, bool clearHistory = false)
         {
             if (clearHistory)
                 _observers.Clear();
@@ -332,6 +333,22 @@ namespace Orc.GraphExplorer
             foreach (var vertex in vertexes)
             {
                 _observers.Add(vertex.Subscribe(this));
+                vertex.OnPositionChanged -= vertex_OnPositionChanged;
+                vertex.OnPositionChanged += vertex_OnPositionChanged;
+            }
+        }
+
+        void vertex_OnPositionChanged(object sender, DataVertex.VertexPositionChangedEventArgs e)
+        {
+            if (View == null || View.Area == null)
+                return;
+
+            var vertex = (DataVertex)sender;
+            if (View.Area.VertexList.Keys.Any(v => v.Id == vertex.Id))
+            {
+                var vc = View.Area.VertexList.First(v => v.Key.Id == vertex.Id).Value;
+                //throw new NotImplementedException();
+                OnNext(new VertexPositionChangeOperation(View.Area, vc, e.OffsetX, e.OffsetY, vertex));
             }
         }
 

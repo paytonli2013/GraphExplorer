@@ -211,11 +211,11 @@ namespace Orc.GraphExplorer.Tests
             //end setup
             bool doCalled = false;
             bool undoCalled = false;
-            var dvo = new DeleteVertexOperation(graph, v1, (dv, vc) => 
+            var dvo = new DeleteVertexOperation(graph, v1, (dv, vc) =>
             {
                 doCalled = true;
-            }, 
-            (dv) => 
+            },
+            (dv) =>
             {
                 undoCalled = true;
             });
@@ -269,11 +269,11 @@ namespace Orc.GraphExplorer.Tests
         public void Vertex_DeletePropertyOperation_Test()
         {
             var vertex = new DataVertex();
-            var p1 = new Model.PropertyViewmodel(1,"p1","p1",vertex);
+            var p1 = new Model.PropertyViewmodel(1, "p1", "p1", vertex);
             vertex.Properties.Add(p1);
-            var p2 = new Model.PropertyViewmodel(2, "p2", "p2", vertex) { IsSelected = true};
+            var p2 = new Model.PropertyViewmodel(2, "p2", "p2", vertex) { IsSelected = true };
             vertex.Properties.Add(p2);
-            var p3 = new Model.PropertyViewmodel(3, "p3", "p3", vertex) { IsSelected = true};
+            var p3 = new Model.PropertyViewmodel(3, "p3", "p3", vertex) { IsSelected = true };
             vertex.Properties.Add(p3);
 
             var dpo = new DeletePropertyOperation(vertex);
@@ -322,19 +322,19 @@ namespace Orc.GraphExplorer.Tests
         }
 
         [TestMethod]
-        public void EditValuePropertyOperation_Test() 
+        public void EditValuePropertyOperation_Test()
         {
             var vertex = new DataVertex();
-            var property = new PropertyViewmodel(1,"key","value",vertex);
+            var property = new PropertyViewmodel(1, "key", "value", vertex);
             vertex.AddProperty(property);
-            var evpo = new EditValuePropertyOperation(property,"value changed");
+            var evpo = new EditValuePropertyOperation(property, "value changed");
 
             evpo.Do();
 
             Assert.AreEqual(property.Value, "value changed");
 
             evpo.UnDo();
-                
+
             Assert.AreEqual(property.Value, "value");
         }
 
@@ -353,6 +353,39 @@ namespace Orc.GraphExplorer.Tests
             ekpo.UnDo();
 
             Assert.AreEqual(property.Key, "key");
+        }
+
+        [TestMethod]
+        public void VertexPositionChanged_Test()
+        {
+            var graph = new Model.GraphArea();
+
+            var vertex = new DataVertex();
+
+            var vctrol = new VertexControl(vertex);
+
+            graph.Graph.AddVertex(vertex);
+
+            graph.AddVertex(vertex, vctrol);
+
+            bool called = false;
+            bool undoCalled = false;
+
+            var vpco = new VertexPositionChangeOperation(graph, vctrol, 10, 10, vertex, (v, vc) =>
+            {
+                called = true;
+            }, (vc) =>
+            {
+                undoCalled = true;
+            });
+
+            vpco.Do();
+
+            Assert.IsTrue(called);
+
+            vpco.UnDo();
+
+            Assert.IsTrue(undoCalled);
         }
     }
 }

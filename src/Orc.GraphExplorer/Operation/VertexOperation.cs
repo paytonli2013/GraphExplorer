@@ -55,6 +55,14 @@ namespace Orc.GraphExplorer
                 _vertex = data;
             else
                 _vertex = DataVertex.Create();
+
+            Status = Orc.GraphExplorer.Status.Init;
+        }
+
+        public Status Status
+        {
+            get;
+            protected set;
         }
 
         //dispose operation, release reference

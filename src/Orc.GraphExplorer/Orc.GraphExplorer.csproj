@@ -120,6 +120,7 @@
     <Compile Include="Model\Result.cs" />
     <Compile Include="NavigateHistoryItem.cs" />
     <Compile Include="Operation\DeleteVertexOperation.cs" />
+    <Compile Include="Operation\VertexPositionChangeOperation.cs" />
     <Compile Include="SettingView.xaml.cs">
       <DependentUpon>SettingView.xaml</DependentUpon>
     </Compile>

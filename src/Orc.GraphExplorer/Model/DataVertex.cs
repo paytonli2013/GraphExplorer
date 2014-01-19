@@ -13,8 +13,108 @@ using System.Collections.ObjectModel;
 
 namespace Orc.GraphExplorer
 {
-    public class DataVertex : VertexBase, INotifyPropertyChanged, IDisposable,IObservable<IOperation>,IObserver<IOperation>
+    public class DataVertex : VertexBase, INotifyPropertyChanged, IDisposable, IObservable<IOperation>, IObserver<IOperation>
     {
+        #region Properties
+
+        double originalX = double.NaN;
+        double originalY = double.NaN;
+
+        double x;
+
+        public double X
+        {
+            get { return x; }
+            set
+            {
+                x = value;
+
+                if (_dragStartX)
+                {
+                    originalX = x;
+                    _dragStartX = false;
+                }
+
+                RaisePropertyChanged("X");
+            }
+        }
+
+        double y;
+
+        public double Y
+        {
+            get { return y; }
+            set
+            {
+                y = value;
+
+                if (_dragStartY)
+                {
+                    originalY = y;
+                    _dragStartX = false;
+                }
+
+                RaisePropertyChanged("Y");
+            }
+        }
+
+        bool _trackDragging = true;
+
+        public bool TrackDragging
+        {
+            get { return _trackDragging; }
+            set
+            {
+                _trackDragging = value;
+                RaisePropertyChanged("TrackDragging");
+            }
+        }
+
+        bool _dragStartX;
+        bool _dragStartY;
+
+        bool _isDragging;
+
+        public bool IsDragging
+        {
+            get { return _isDragging; }
+            set
+            {
+                if (_isDragging != value)
+                {
+                    _isDragging = value;
+                    if (_isDragging && TrackDragging)
+                        DragStart();
+                    else
+                        DragStop();
+                }
+            }
+        }
+
+        private void DragStop()
+        {
+            if (!IsEditing)
+                return;
+
+            if (double.IsNaN(originalX) || double.IsNaN(originalY))
+            {
+                originalX = 0;
+                originalY = 0;
+            }
+
+            double offsetX = X - originalX;
+            double offsetY = y - originalY;
+
+            if (offsetX != 0 || offsetY != 0)
+                FirePositionChanged(X, Y, offsetX, offsetY);
+        }
+
+        private void DragStart()
+        {
+            _dragStartX = true;
+            _dragStartY = true;
+        }
+
         bool isSelected;
 
         public bool IsSelected
@@ -36,8 +136,7 @@ namespace Orc.GraphExplorer
             {
                 _isExpanded = value;
                 RaisePropertyChanged("IsExpanded");
-                if (!_isExpanded && Properties != null && Properties.Count > 2)
-                    FireIsExpandedChanged();
+                FireIsExpandedChanged();
             }
         }
 
@@ -112,7 +211,7 @@ namespace Orc.GraphExplorer
         ObservableCollection<PropertyViewmodel> propertiesVMs = null;
         public ObservableCollection<PropertyViewmodel> Properties
         {
-            get 
+            get
             {
                 if (propertiesVMs == null)
                     propertiesVMs = new ObservableCollection<PropertyViewmodel>();
@@ -129,7 +228,6 @@ namespace Orc.GraphExplorer
         [YAXDontSerialize]
         public ImageSource Icon { get; set; }
 
-        #region Calculated or static props
         [YAXDontSerialize]
         public DataVertex Self
         {
@@ -180,7 +278,7 @@ namespace Orc.GraphExplorer
         {
             int index = 0;
 
-            var pvs = from pair in dictionary select new PropertyViewmodel(index++,pair.Key, pair.Value, data);
+            var pvs = from pair in dictionary select new PropertyViewmodel(index++, pair.Key, pair.Value, data);
 
             return new ObservableCollection<PropertyViewmodel>(pvs);
         }
@@ -263,7 +361,7 @@ namespace Orc.GraphExplorer
                 Properties.Add(p);
             }
 
-            Properties = new ObservableCollection<PropertyViewmodel>(Properties.OrderBy(p=>p.Index));
+            Properties = new ObservableCollection<PropertyViewmodel>(Properties.OrderBy(p => p.Index));
         }
 
         public IEnumerable<PropertyViewmodel> RemoveSelectedProperties()
@@ -286,7 +384,7 @@ namespace Orc.GraphExplorer
             return list;
         }
 
-        public PropertyViewmodel RemoveProperty(PropertyViewmodel property) 
+        public PropertyViewmodel RemoveProperty(PropertyViewmodel property)
         {
             Properties.Remove(property);
 
@@ -411,7 +509,7 @@ namespace Orc.GraphExplorer
         {
             DataVertex _vertex;
             Guid _observerId;
-            public VertexObserverable(DataVertex vertex, Guid observerId) 
+            public VertexObserverable(DataVertex vertex, Guid observerId)
             {
                 _vertex = vertex;
                 _observerId = observerId;
@@ -455,6 +553,38 @@ namespace Orc.GraphExplorer
         {
             Observe(value);
             //throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region Event
+        public event EventHandler<VertexPositionChangedEventArgs> OnPositionChanged;
+
+        private void FirePositionChanged(double x, double y, double offsetx, double offsety)
+        {
+            var handler = OnPositionChanged;
+            if (handler != null)
+            {
+                var arg = new VertexPositionChangedEventArgs(x, y, offsetx, offsety);
+
+                handler.Invoke(this, arg);
+            }
+        }
+
+        public class VertexPositionChangedEventArgs : EventArgs
+        {
+            public double X { get; private set; }
+            public double Y { get; private set; }
+            public double OffsetX { get; private set; }
+            public double OffsetY { get; private set; }
+
+            public VertexPositionChangedEventArgs(double x, double y, double offsetx, double offsety)
+            {
+                X = x;
+                Y = y;
+                OffsetX = offsetx;
+                OffsetY = offsety;
+            }
         }
 
         #endregion

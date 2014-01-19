@@ -33,10 +33,15 @@ namespace Orc.GraphExplorer
 
         public abstract void UnDo();
 
-
         public virtual bool IsUnDoable
         {
             get { return true; }
+        }
+
+        public Status Status
+        {
+            get;
+            protected set;
         }
 
         public virtual void Dispose()

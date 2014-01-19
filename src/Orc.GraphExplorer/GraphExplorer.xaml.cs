@@ -316,7 +316,7 @@ namespace Orc.GraphExplorer
             //This property sets edge routing algorithm that is used to build route paths according to algorithm logic.
             //For ex., SimpleER algorithm will try to set edge paths around vertices so no edge will intersect any vertex.
             //Bundling algorithm will try to tie different edges that follows same direction to a single channel making complex graphs more appealing.
-            area.DefaultEdgeRoutingAlgorithm = GraphX.EdgeRoutingAlgorithmTypeEnum.None;
+            area.DefaultEdgeRoutingAlgorithm = GraphX.EdgeRoutingAlgorithmTypeEnum.SimpleER;
 
             //This property sets async algorithms computation so methods like: Area.RelayoutGraph() and Area.GenerateGraph()
             //will run async with the UI thread. Completion of the specified methods can be catched by corresponding events:
@@ -343,28 +343,41 @@ namespace Orc.GraphExplorer
         {
             foreach (var vertex in Area.VertexList)
             {
-                vertex.Key.IsExpandedChanged += (s, e) => vertex_IsExpandedChanged(s, e, vertex.Value);
+                vertex.Key.IsExpandedChanged += (s, e) => vertex_IsExpandedChanged(s, e);
             }
             //throw new NotImplementedException();
         }
 
-        void vertex_IsExpandedChanged(object sender, EventArgs e, VertexControl vc)
+        void vertex_IsExpandedChanged(object sender, EventArgs e)
         {
-            if (!((DataVertex)sender).IsExpanded && tbtnCanDrag.IsChecked.HasValue&&tbtnCanDrag.IsChecked.Value)
+            var vertex = (DataVertex)sender;
+
+            if (vertex.IsExpanded || vertex.Properties == null || vertex.Properties.Count < 1 || !Area.VertexList.ContainsKey(vertex))
+                return;
+
+            var vc = Area.VertexList[vertex];
+
+            if (tbtnCanDrag.IsChecked.HasValue && tbtnCanDrag.IsChecked.Value)
             {
                 RunCodeInUiThread(() =>
                 {
                     foreach (var edge in Area.GetRelatedControls(vc, GraphControlType.Edge, EdgesType.All))
                     {
-                        var ec = edge as EdgeControl;
+                        var ec = (EdgeControl)edge;
                         var op = new DeleteEdgeOperation(Area, ec.Source.Vertex as DataVertex, ec.Target.Vertex as DataVertex, ec.Edge as DataEdge);
                         op.Do();
-
                         op.UnDo();
                     }
-                });
+
+                    //    Area.GenerateAllEdges();
+                    //    Area.ShowAllEdgesLabels();
+                    //Area.ComputeEdgeRoutesByVertex(vc);
+                    //Area.InvalidateVisual();
+                    //////Area.UpdateAllEdges();
+                    //Area.ComputeEdgeRoutesByVertex(vc);
+                    //vc.InvalidateVisual();
+                },priority: DispatcherPriority.Loaded);
             }
-            //throw new NotImplementedException();
         }
 
         void OnEdgeLoaded(IEnumerable<DataEdge> edges)
@@ -809,44 +822,28 @@ namespace Orc.GraphExplorer
                     {
                         DragBehaviour.SetIsDragEnabled(vc, false);
                     }
+
+                    v.IsEditing = true;
+                    v.OnPositionChanged -= v_OnPositionChanged;
+                    v.OnPositionChanged += v_OnPositionChanged;
                 },
                 (v) =>
                 {
                     _selectedVertices.Remove(v.Id);
                     //on vertex recreated
                 }));
-
-
-
             //FitToBounds(area.Dispatcher, zoom);
         }
 
-        private void CreateEdge(int fromId, int toId, GraphArea area)
+        void v_OnPositionChanged(object sender, DataVertex.VertexPositionChangedEventArgs e)
         {
-            var source = area.VertexList.Where(pair => pair.Key.Id == fromId).Select(pair => pair.Key).FirstOrDefault();
-            var target = area.VertexList.Where(pair => pair.Key.Id == toId).Select(pair => pair.Key).FirstOrDefault();
-            if (source == null || target == null)
-                return;
-
-            _viewmodel.Do(new CreateEdgeOperation(Area, source, target,
-                (e) =>
-                {
-                    //on vertex created
-                    //_selectedVertices.Add(v.Id);
-
-                    HighlightBehaviour.SetIsHighlightEnabled(e, false);
-                    HighlightBehaviour.SetHighlighted(e, false);
-
-                    HighlightBehaviour.SetHighlighted(area.VertexList[source], false);
-                    HighlightBehaviour.SetHighlighted(area.VertexList[target], false);
-
-                    UpdateHighlightBehaviour(true);
-                },
-                (e) =>
-                {
-                    //_selectedVertices.Remove(v.Id);
-                    //on vertex recreated
-                }));
+            var vertex = (DataVertex)sender;
+            if (Area.VertexList.Keys.Any(v => v.Id == vertex.Id))
+            {
+                var vc = Area.VertexList.First(v => v.Key.Id == vertex.Id).Value;
+                //throw new NotImplementedException();
+                _viewmodel.Do(new VertexPositionChangeOperation(Area, vc, e.OffsetX, e.OffsetY, vertex));
+            }
         }
 
         private void SafeRemoveVertex(VertexControl vc, GraphArea area, bool removeFromSelected = false)
@@ -872,7 +869,7 @@ namespace Orc.GraphExplorer
             MessageBox.Show(message);
         }
 
-        protected static void RunCodeInUiThread<T>(Action<T> action, T parameter, Dispatcher dispatcher = null, DispatcherPriority priority = DispatcherPriority.Background)
+        public static void RunCodeInUiThread<T>(Action<T> action, T parameter, Dispatcher dispatcher = null, DispatcherPriority priority = DispatcherPriority.Background)
         {
             if (action == null)
                 return;
@@ -887,7 +884,7 @@ namespace Orc.GraphExplorer
             }
         }
 
-        protected static void RunCodeInUiThread(Action action, Dispatcher dispatcher = null, DispatcherPriority priority = DispatcherPriority.Background)
+        public static void RunCodeInUiThread(Action action, Dispatcher dispatcher = null, DispatcherPriority priority = DispatcherPriority.Background)
         {
             if (action == null)
                 return;

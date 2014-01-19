@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Orc.GraphExplorer
 {
-    public interface IOperation:IDisposable
+    public interface IOperation : IDisposable
     {
         string Sammary { get; }
 
@@ -13,6 +13,16 @@ namespace Orc.GraphExplorer
 
         void UnDo();
 
-        bool IsUnDoable{ get;}
+        bool IsUnDoable { get; }
+
+        Status Status { get; }
+    }
+
+    public enum Status
+    {
+        Init,
+        Done,
+        Undo,
+        Redo
     }
 }
