@@ -17,10 +17,14 @@ namespace Orc.GraphExplorer
     {
         TGraph _graph;
         double _rate;
-        public TopologicalLayoutAlgorithm(TGraph graph,double rate)
+        double _offsetX;
+        double _offsetY;
+        public TopologicalLayoutAlgorithm(TGraph graph,double rate,double offsetX = 0,double offsetY = 600)
         {
             _graph = graph;
             _rate = rate;
+            _offsetX = offsetX;
+            _offsetY = offsetY;
         }
 
         public void Compute()
@@ -40,7 +44,7 @@ namespace Orc.GraphExplorer
             //vertexPositions = esla.VertexPositions;
             foreach (var item in esla.VertexPositions)
             {
-                vertexPositions.Add(item.Key, new Point(item.Value.Y * 1.5, item.Value.X));
+                vertexPositions.Add(item.Key, new Point(item.Value.Y * 1.5 +this._offsetX, item.Value.X + this._offsetY));
             }
         }
 

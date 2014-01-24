@@ -222,7 +222,7 @@ namespace Orc.GraphExplorer
             //overrallGraph.get
             var historyItem = GetHistoryItem(dataVertex, overrallGraph);
 
-            CreateGraphArea(AreaNav, historyItem.Vertexes, historyItem.Edges);
+            CreateGraphArea(AreaNav, historyItem.Vertexes, historyItem.Edges,0);
 
             //var dispatcher = AreaNav.Dispatcher;
 
@@ -334,7 +334,7 @@ namespace Orc.GraphExplorer
         {
             Vertexes = new List<DataVertex>(vertexes);
 
-            CreateGraphArea(Area, Vertexes, Edges);
+            CreateGraphArea(Area, Vertexes, Edges,600);
 
             HookVertexEvent(Area);
 
@@ -389,7 +389,7 @@ namespace Orc.GraphExplorer
             GraphDataService.GetVertexes(OnVertexesLoaded, OnError);
         }
 
-        private void CreateGraphArea(GraphArea area, IEnumerable<DataVertex> vertexes, IEnumerable<DataEdge> edges)
+        private void CreateGraphArea(GraphArea area, IEnumerable<DataVertex> vertexes, IEnumerable<DataEdge> edges,double offsetY)
         {
             area.ClearLayout();
 
@@ -399,7 +399,7 @@ namespace Orc.GraphExplorer
 
             graph.AddEdgeRange(edges);
 
-            area.ExternalLayoutAlgorithm = new TopologicalLayoutAlgorithm<DataVertex, DataEdge, QuickGraph.BidirectionalGraph<DataVertex, DataEdge>>(graph, 1.5);
+            area.ExternalLayoutAlgorithm = new TopologicalLayoutAlgorithm<DataVertex, DataEdge, QuickGraph.BidirectionalGraph<DataVertex, DataEdge>>(graph, 1.5, offsetY: offsetY);
 
             area.GenerateGraph(graph, true, true);
         }
