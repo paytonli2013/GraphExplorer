@@ -20,6 +20,33 @@ namespace Orc.GraphExplorer
         double originalX = double.NaN;
         double originalY = double.NaN;
 
+        bool _isEnabled = true;
+
+        public bool IsEnabled
+        {
+            get
+            { 
+                return _isEnabled;
+            }
+            set
+            {
+                _isEnabled = value;
+                RaisePropertyChanged("IsEnabled");
+            }
+        }
+
+        bool _isVisible = true;
+
+        public bool IsVisible
+        {
+            get { return _isVisible; }
+            set
+            {
+                _isVisible = value;
+                RaisePropertyChanged("IsVisible");
+            }
+        }
+
         double x;
 
         public double X

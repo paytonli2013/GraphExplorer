@@ -84,6 +84,9 @@ namespace Orc.GraphExplorer
             ShowAllEdgesLabels(sender as GraphArea, true);
 
             FitToBounds(null, zoom);
+
+            _viewmodel.SetVertexPropertiesBinding();
+
         }
 
         private void ShowAllEdgesLabels(GraphArea area, bool show)
@@ -376,7 +379,7 @@ namespace Orc.GraphExplorer
                     //////Area.UpdateAllEdges();
                     //Area.ComputeEdgeRoutesByVertex(vc);
                     //vc.InvalidateVisual();
-                },priority: DispatcherPriority.Loaded);
+                }, priority: DispatcherPriority.Loaded);
             }
         }
 

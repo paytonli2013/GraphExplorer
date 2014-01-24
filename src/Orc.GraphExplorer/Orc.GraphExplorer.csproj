@@ -35,8 +35,17 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Catel.Core">
+      <HintPath>..\..\lib\Catel.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Catel.MVVM">
+      <HintPath>..\..\lib\Catel.MVVM.dll</HintPath>
+    </Reference>
     <Reference Include="CsvHelper">
       <HintPath>..\..\lib\CsvHelper.dll</HintPath>
+    </Reference>
+    <Reference Include="Fasterflect">
+      <HintPath>..\..\lib\Fasterflect.dll</HintPath>
     </Reference>
     <Reference Include="GraphX, Version=0.1.0.1, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -44,6 +53,12 @@
     </Reference>
     <Reference Include="Microsoft.Practices.Prism">
       <HintPath>..\..\lib\Microsoft.Practices.Prism.dll</HintPath>
+    </Reference>
+    <Reference Include="Orc.FilterBuilder.NET40">
+      <HintPath>..\..\lib\Orc.FilterBuilder.NET40.dll</HintPath>
+    </Reference>
+    <Reference Include="Orc.Toolkit">
+      <HintPath>..\..\lib\Orc.Toolkit.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -92,6 +107,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Converter\BoolToVisibilityConverter.cs" />
+    <Compile Include="Model\FilterEntity.cs" />
     <Compile Include="Operation\EditValuePropertyOperation.cs" />
     <Compile Include="Operation\EditKeyPropertyOperation.cs" />
     <Compile Include="Operation\AddPropertyOperation.cs" />

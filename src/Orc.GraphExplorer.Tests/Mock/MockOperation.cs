@@ -63,6 +63,9 @@ namespace Orc.GraphExplorer.Tests.Mock
         bool isDisposed;
         public void Dispose()
         {
+            if (isDisposed)
+                return;
+
             isDisposed = true;
             //throw new NotImplementedException();
         }

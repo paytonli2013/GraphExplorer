@@ -7,6 +7,7 @@
     xmlns:Controls="clr-namespace:GraphX.Controls;assembly=GraphX"
     xmlns:Converters="clr-namespace:GraphX.Converters;assembly=GraphX"       
     xmlns:converter="clr-namespace:Orc.GraphExplorer.Converter;assembly=Orc.GraphExplorer"
+    xmlns:orctk="clr-namespace:Orc.Toolkit;assembly=Orc.Toolkit"
     xmlns:conv="clr-namespace:GraphX.Converters;assembly=GraphX">
 
     <!--TabControl-->
@@ -761,6 +762,47 @@
         </Setter>
     </Style>
 
+    <Style x:Key="FilterToggleButtonStyle" TargetType="{x:Type ToggleButton}">
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Padding" Value="1"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ToggleButton}">
+                    <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="true">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Name="checkedBorder" Grid.ColumnSpan="2" BorderThickness="1" Opacity="0" BorderBrush="{StaticResource Button.MouseOver.Border}" Background="{StaticResource Button.MouseOver.Background}"/>
+                            <ContentPresenter x:Name="contentPresenter" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="{StaticResource Button.Disabled.Foreground}"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="true">
+                            <Setter Property="Background" TargetName="border" Value="{StaticResource Button.MouseOver.Background}"/>
+                            <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource Button.MouseOver.Border}"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter Property="Opacity" TargetName="checkedBorder" Value="1"/>
+                            <!--<Setter Property="BorderThickness" TargetName="checkedBorder" Value="1,1,1,0"/>-->
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="False">
+                            <Setter Property="Opacity" TargetName="checkedBorder" Value="0"/>
+                            <!--<Setter Property="BorderThickness" TargetName="checkedBorder" Value="1"/>-->
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
     <!--Slider-->
     <SolidColorBrush x:Key="SliderThumb.Static.Foreground" Color="{StaticResource AccentColor}"/>
     <SolidColorBrush x:Key="SliderThumb.MouseOver.Background" Color="{StaticResource AccentColor}"/>
@@ -1367,7 +1409,7 @@
                             <Border Margin="4" CornerRadius="1" Width="32" Height="32" BorderThickness="1" BorderBrush="{StaticResource NormalBorderBrush}">
                                 <Image Source="{Binding Icon,TargetNullValue={StaticResource ImageSource}}" Stretch="UniformToFill" />
                             </Border>
-                            <TextBlock Text="{Binding Title}" VerticalAlignment="Center" FontWeight="Bold" Foreground="Black" Grid.Column="1" Grid.Row="0" Margin="3" MinWidth="100"/>
+                            <TextBlock Text="{Binding Title}" VerticalAlignment="Center" FontWeight="Bold" Grid.Column="1" Grid.Row="0" Margin="3" MinWidth="100"/>
                         </Grid>
                         <Expander HorizontalAlignment="Stretch" IsExpanded="{Binding IsExpanded}" Foreground="{StaticResource NormalForegroudBrush}" Margin="0,10,0,0" Style="{StaticResource ExpanderStyle}" VerticalAlignment="Stretch">
                             <Expander.Header>
@@ -1421,7 +1463,7 @@
                                 <BeginStoryboard Storyboard="{StaticResource HighlightOff}" />
                             </Trigger.ExitActions>
                         </Trigger>
-                        <Trigger Property="IsMouseOver" Value="true">
+                        <Trigger Property="IsMouseOver" Value="True">
                             <Trigger.ExitActions>
                                 <BeginStoryboard Storyboard="{StaticResource HoverOff}" x:Name="HoverOff_BeginStoryboard" />
                             </Trigger.ExitActions>
@@ -1429,6 +1471,10 @@
                                 <BeginStoryboard Storyboard="{StaticResource HoverOn}" />
                             </Trigger.EnterActions>
                         </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                                <!--<Setter Property="TextElement.Foreground" TargetName="root" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>-->
+                            <Setter Property="Background" TargetName="BackgroundNorm" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                       </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
@@ -1674,5 +1720,99 @@
         </Style.Triggers>
     </Style>
 
+    <!--DropDownButton-->
+    <ControlTemplate x:Key="DropDownButtonControlTemplate1" TargetType="{x:Type orctk:DropDownButton}">
+        <Grid x:Name="grid" Background="Transparent">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="14"/>
+            </Grid.ColumnDefinitions>
+            <VisualStateManager.VisualStateGroups>
+                <VisualStateGroup x:Name="CommonStates">
+                    <VisualState x:Name="Normal"/>
+                    <VisualState x:Name="MouseOver"/>
+                    <VisualState x:Name="Disabled">
+                        <Storyboard>
+                            <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Fill" Storyboard.TargetName="arrow">
+                                <DiscreteObjectKeyFrame KeyTime="0" Value="Gray"/>
+                            </ObjectAnimationUsingKeyFrames>
+                        </Storyboard>
+                    </VisualState>
+                </VisualStateGroup>
+            </VisualStateManager.VisualStateGroups>
+            <ToggleButton x:Name="PART_ToggleDropDown" Style="{StaticResource FilterToggleButtonStyle}" ClickMode="Press" Grid.ColumnSpan="2" ContentTemplate="{TemplateBinding HeaderTemplate}" Focusable="False" IsChecked="{Binding IsOpen, ElementName=PART_Popup, Mode=TwoWay}">
+                <Grid Margin="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <!--<ColumnDefinition Width="14"/>-->
+                    </Grid.ColumnDefinitions>
+                    <!--<Path x:Name="arrow" Grid.Column="1" Data="M0,0L2.5,3 5,0z" Fill="Black" HorizontalAlignment="Center" Stretch="None" VerticalAlignment="Center" Width="5"/>-->
+                    <!--<Path Width="28" Height="28" Stretch="Fill" Fill="{StaticResource AccentBrush}" Data="F1 M 34.8333,61.75L 34.8333,42.75L 19,20.5833L 57,20.5833L 41.1667,42.75L 41.1667,58.5833L 34.8333,61.75 Z "/>-->
+                    <Canvas xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="appbar_filter" Width="28" Height="28" Clip="F1 M 0,0L 76,0L 76,76L 0,76L 0,0">
+                        <Path Width="14" Canvas.Left="4" Canvas.Top="4" Height="14" Stretch="Fill" Fill="{StaticResource AccentBrush}" Data="F1 M 34.8333,61.75L 34.8333,42.75L 19,20.5833L 57,20.5833L 41.1667,42.75L 41.1667,58.5833L 34.8333,61.75 Z "/>
+                    </Canvas>
 
+                    <!--<Grid>
+                        <ContentControl ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Header}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>-->
+                </Grid>
+            </ToggleButton>
+            <Popup x:Name="PART_Popup" AllowsTransparency="True" Focusable="True" Placement="{Binding PopupPlacement, RelativeSource={RelativeSource TemplatedParent}}" StaysOpen="False">
+                <Border BorderBrush="{StaticResource AccentBrush}" Background="White" BorderThickness="1" Margin="0">
+                    <Border BorderThickness="1">
+                        <Grid Background="Transparent">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Border x:Name="PART_DragGrip" Height="10" Margin="5,0" VerticalAlignment="Center">
+                                <Border.Background>
+                                    <DrawingBrush TileMode="Tile" Viewbox="0,0,4,4" Viewport="0,0,3,3" ViewportUnits="Absolute" ViewboxUnits="Absolute">
+                                        <DrawingBrush.Drawing>
+                                            <DrawingGroup>
+                                                <GeometryDrawing Brush="White">
+                                                    <GeometryDrawing.Geometry>
+                                                        <RectangleGeometry Rect="1,1,3,3"/>
+                                                    </GeometryDrawing.Geometry>
+                                                </GeometryDrawing>
+                                                <GeometryDrawing Brush="#FFCCCCCC">
+                                                    <GeometryDrawing.Geometry>
+                                                        <RectangleGeometry Rect="0,0,2,2"/>
+                                                    </GeometryDrawing.Geometry>
+                                                </GeometryDrawing>
+                                            </DrawingGroup>
+                                        </DrawingBrush.Drawing>
+                                    </DrawingBrush>
+                                </Border.Background>
+                                <Border.Visibility>
+                                    <Binding Path="IsDragable" RelativeSource="{RelativeSource TemplatedParent}">
+                                        <Binding.Converter>
+                                            <BooleanToVisibilityConverter/>
+                                        </Binding.Converter>
+                                    </Binding>
+                                </Border.Visibility>
+                            </Border>
+                            <ContentControl x:Name="PART_Content" Grid.ColumnSpan="2" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" Focusable="True" Margin="{TemplateBinding Padding}" Grid.Row="1"/>
+                            <ToggleButton x:Name="PinButton" Style="{StaticResource ToggleButtonStyle}" Grid.Column="1" IsChecked="{Binding IsPinned, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" Margin="1">
+                                <ToggleButton.Visibility>
+                                    <Binding Path="IsDragable" RelativeSource="{RelativeSource TemplatedParent}">
+                                        <Binding.Converter>
+                                            <BooleanToVisibilityConverter/>
+                                        </Binding.Converter>
+                                    </Binding>
+                                </ToggleButton.Visibility>
+                            </ToggleButton>
+                        </Grid>
+                    </Border>
+                </Border>
+            </Popup>
+        </Grid>
+    </ControlTemplate>
+    <Style x:Key="FilterButtonStyle" TargetType="{x:Type orctk:DropDownButton}">
+        <Setter Property="Template" Value="{StaticResource DropDownButtonControlTemplate1}"/>
+    </Style>
 </ResourceDictionary>

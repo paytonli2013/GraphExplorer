@@ -43,8 +43,6 @@ namespace Orc.GraphExplorer.Model
             }
         }
 
-        bool _isDirty;
-
         public bool IsDirty
         {
             get { return OriginalValue != Value; }
@@ -95,6 +93,12 @@ namespace Orc.GraphExplorer.Model
         }
 
         DataVertex _data;
+
+        public DataVertex Data
+        {
+            get { return _data; }
+        }
+
         IDisposable _dispose;
 
         #endregion

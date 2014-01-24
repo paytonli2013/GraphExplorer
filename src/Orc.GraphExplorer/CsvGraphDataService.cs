@@ -162,20 +162,10 @@ namespace Orc.GraphExplorer
                         var fromId = reader.GetField<int>(0);
                         var toId = reader.GetField<int>(1);
 
-                        DataVertex from = null;
-                        DataVertex to = null;
+                        DataVertex from;
+                        DataVertex to;
 
-                        if (!vCache.TryGetValue(fromId, out from))
-                        {
-                            from = new DataVertex(fromId);
-                            vCache.Add(fromId, from);
-                        }
-
-                        if (!vCache.TryGetValue(toId, out to))
-                        {
-                            to = new DataVertex(toId);
-                            vCache.Add(toId, to);
-                        }
+                        UpdateEdgeRef(fromId, toId, out from, out to);
 
                         list.Add(new DataEdge(from, to));
                         //}
@@ -189,6 +179,24 @@ namespace Orc.GraphExplorer
             {
                 if (onFail != null)
                     onFail.Invoke(error);
+            }
+        }
+
+        private void UpdateEdgeRef(int fromId, int toId, out DataVertex from, out DataVertex to)
+        {
+            from = null;
+            to = null;
+
+            if (!vCache.TryGetValue(fromId, out from))
+            {
+                from = new DataVertex(fromId);
+                vCache.Add(fromId, from);
+            }
+
+            if (!vCache.TryGetValue(toId, out to))
+            {
+                to = new DataVertex(toId);
+                vCache.Add(toId, to);
             }
         }
 

@@ -10,7 +10,9 @@
              xmlns:local="clr-namespace:Orc.GraphExplorer"
     xmlns:Controls="clr-namespace:GraphX.Controls;assembly=GraphX"
              xmlns:Converters="clr-namespace:GraphX.Converters;assembly=GraphX"
+             xmlns:net401="clr-namespace:Orc.FilterBuilder.NET40;assembly=Orc.FilterBuilder.NET40"
              xmlns:converter="clr-namespace:Orc.GraphExplorer.Converter"
+             xmlns:orctk="clr-namespace:Orc.Toolkit;assembly=Orc.Toolkit"
              d:DesignHeight="300" d:DesignWidth="300">
     <UserControl.Resources>
         <ResourceDictionary>
@@ -44,26 +46,25 @@
                     </Grid.RowDefinitions>
 
                     <Border Margin="0" Height="32" Background="{StaticResource ScrollViewBackground}" BorderThickness="1" BorderBrush="{StaticResource NormalBorderBrush}">
-                        <StackPanel Orientation="Horizontal">
-                            <Button ToolTip="Save Layout To Xml"  Height="28" Width="28" Name="btnSave" Style="{StaticResource SaveButtonStyle}" Click="btnSave_Click"/>
-                            <Button Height="28" Width="28" ToolTip="Load Layout From Xml"  Name="btnLoad" Style="{StaticResource LoadButtonStyle}" Click="btnLoad_Click"/>
-                            <Button Height="28" Width="28" ToolTip="Save As Image" Name="btnExport" Style="{StaticResource ExportButtonStyle}" Click="btnExport_Click"/>
+                        <DockPanel>
+                            <Button DockPanel.Dock="Left"  ToolTip="Save Layout To Xml"  Height="28" Width="28" Name="btnSave" Style="{StaticResource SaveButtonStyle}" Click="btnSave_Click"/>
+                            <Button DockPanel.Dock="Left" Height="28" Width="28" ToolTip="Load Layout From Xml"  Name="btnLoad" Style="{StaticResource LoadButtonStyle}" Click="btnLoad_Click"/>
+                            <Button DockPanel.Dock="Left" Height="28" Width="28" ToolTip="Save As Image" Name="btnExport" Style="{StaticResource ExportButtonStyle}" Click="btnExport_Click"/>
 
-                            <Rectangle Fill="{StaticResource NormalBorderBrush}" Width="1" VerticalAlignment="Stretch" Margin="4"/>
-                            <ToggleButton Style="{StaticResource DragToggleButtonStyle}" IsChecked="{Binding CanDrag,Mode=TwoWay}" Height="28" Width="28" ToolTip="Enable Drag" Name="tbtnCanDrag"/>
-                            <ToggleButton Style="{StaticResource EditToggleButtonStyle}" IsChecked="{Binding IsInEditing}" Height="28" Width="28" ToolTip="Enable Edit Mode" Name="tbtnCanEdit" Click="tbtnCanEdit_Click"/>
-                            <StackPanel Orientation="Horizontal" Name="editPanel" Visibility="{Binding IsChecked,ElementName=tbtnCanEdit,Converter={StaticResource BoolToVisibilityConverter}}">
-                                <Button Height="28" ToolTip="Create Link" Name="tbnNewEdge" Click="tbnNewEdge_Click" Width="28" Style="{StaticResource EdgeButtonStyle}"/>
-                                <Button Height="28" ToolTip="Create Node" Name="tbnNewNode" Click="tbnNewNode_Click"  Width="28" Style="{StaticResource VertexButtonStyle}"/>
-                                <Button Height="28" ToolTip="Undo" Name="tbnUndo" Command="{Binding UndoCommand}" Width="28" Style="{StaticResource UndoButtonStyle}"/>
-                                <Button Height="28" ToolTip="Redo" Name="tbnRedo" Command="{Binding RedoCommand}" Width="28" Style="{StaticResource RedoButtonStyle}"/>
-                                <Button Height="28" ToolTip="Save Changes To Data Source" Name="tbnSaveChanges" Click="tbnSaveChanges_Click" Width="28" Style="{StaticResource SaveButtonStyle}"/>
-
+                            <Rectangle DockPanel.Dock="Left" Fill="{StaticResource NormalBorderBrush}" Width="1" VerticalAlignment="Stretch" Margin="4"/>
+                            <ToggleButton DockPanel.Dock="Left" Style="{StaticResource DragToggleButtonStyle}" IsChecked="{Binding CanDrag,Mode=TwoWay}" Height="28" Width="28" ToolTip="Enable Drag" Name="tbtnCanDrag"/>
+                            <ToggleButton DockPanel.Dock="Left" Style="{StaticResource EditToggleButtonStyle}" IsChecked="{Binding IsInEditing}" Height="28" Width="28" ToolTip="Enable Edit Mode" Name="tbtnCanEdit" Click="tbtnCanEdit_Click"/>
+                            <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" Name="editPanel" Visibility="{Binding IsChecked,ElementName=tbtnCanEdit,Converter={StaticResource BoolToVisibilityConverter}}">
+                                <Button Height="28" DockPanel.Dock="Left" ToolTip="Create Link" Name="tbnNewEdge" Click="tbnNewEdge_Click" Width="28" Style="{StaticResource EdgeButtonStyle}"/>
+                                <Button Height="28" DockPanel.Dock="Left" ToolTip="Create Node" Name="tbnNewNode" Click="tbnNewNode_Click"  Width="28" Style="{StaticResource VertexButtonStyle}"/>
+                                <Button Height="28" DockPanel.Dock="Left" ToolTip="Undo" Name="tbnUndo" Command="{Binding UndoCommand}" Width="28" Style="{StaticResource UndoButtonStyle}"/>
+                                <Button Height="28" DockPanel.Dock="Left" ToolTip="Redo" Name="tbnRedo" Command="{Binding RedoCommand}" Width="28" Style="{StaticResource RedoButtonStyle}"/>
+                                <Button Height="28" DockPanel.Dock="Left" ToolTip="Save Changes To Data Source" Name="tbnSaveChanges" Click="tbnSaveChanges_Click" Width="28" Style="{StaticResource SaveButtonStyle}"/>
                             </StackPanel>
-                            <Rectangle Fill="{StaticResource NormalBorderBrush}" Width="1" VerticalAlignment="Stretch" Margin="4"/>
-                            <Button Height="28" ToolTip="Refresh Graph" Width="28" Name="btnRefresh" Style="{StaticResource RefershButtonStyle}" Click="btnRefresh_Click"/>
-                            <Rectangle Fill="{StaticResource NormalBorderBrush}" Width="1" VerticalAlignment="Stretch" Margin="4"/>
-                            <Slider Style="{StaticResource SliderStyle}" Width="100"
+                            <Rectangle  DockPanel.Dock="Left" Fill="{StaticResource NormalBorderBrush}" Width="1" VerticalAlignment="Stretch" Margin="4"/>
+                            <Button DockPanel.Dock="Left" Height="28" ToolTip="Refresh Graph" Width="28" Name="btnRefresh" Style="{StaticResource RefershButtonStyle}" Click="btnRefresh_Click"/>
+                            <Rectangle DockPanel.Dock="Left" Fill="{StaticResource NormalBorderBrush}" Width="1" VerticalAlignment="Stretch" Margin="4"/>
+                            <Slider DockPanel.Dock="Left" Style="{StaticResource SliderStyle}" Width="100"
                                             Minimum="{Binding MinZoom,ElementName=zoomctrl,Converter={StaticResource log10Converter}}"
                                             Maximum="{Binding MaxZoom,ElementName=zoomctrl,Converter={StaticResource log10Converter}}"
                                             Value="{Binding Zoom,ElementName=zoomctrl,Mode=TwoWay,Converter={StaticResource log10Converter}}"
@@ -76,10 +77,18 @@
                                             LargeChange="0.2"
                                             SmallChange="0.1"
                                             Orientation="Horizontal" />
-                            <TextBlock Foreground="{StaticResource AccentBrush}" Width="30" Text="{Binding Path=Zoom,ElementName=zoomctrl,StringFormat='{}{0:P0}'}" FontSize="10" FontWeight="Normal" VerticalAlignment="Center" Margin="2"/>
-                            <ToggleButton Margin="1" Style="{StaticResource ToggleButtonStyle}" Width="28" Content="Fill" IsChecked="{Binding Mode,ElementName=zoomctrl,Converter={StaticResource equalityConverter},ConverterParameter={x:Static Controls:ZoomControlModes.Fill}}" />
-                            <ToggleButton Margin="1" Style="{StaticResource ToggleButtonStyle}" Width="28" Content="1:1" IsChecked="{Binding Mode,ElementName=zoomctrl,Converter={StaticResource equalityConverter},ConverterParameter={x:Static Controls:ZoomControlModes.Original}}" />
-                        </StackPanel>
+                            <TextBlock DockPanel.Dock="Left" Foreground="{StaticResource AccentBrush}" Width="30" Text="{Binding Path=Zoom,ElementName=zoomctrl,StringFormat='{}{0:P0}'}" FontSize="10" FontWeight="Normal" VerticalAlignment="Center" Margin="2"/>
+                            <ToggleButton DockPanel.Dock="Left" Margin="1" Style="{StaticResource ToggleButtonStyle}" Width="28" Content="Fill" IsChecked="{Binding Mode,ElementName=zoomctrl,Converter={StaticResource equalityConverter},ConverterParameter={x:Static Controls:ZoomControlModes.Fill}}" />
+                            <ToggleButton DockPanel.Dock="Left" Margin="1" Style="{StaticResource ToggleButtonStyle}" Width="28" Content="1:1" IsChecked="{Binding Mode,ElementName=zoomctrl,Converter={StaticResource equalityConverter},ConverterParameter={x:Static Controls:ZoomControlModes.Original}}" />
+                            <orctk:DropDownButton ToolTip="Filter" Style="{StaticResource FilterButtonStyle}" HorizontalAlignment="Left" DockPanel.Dock="Left" Height="28" Width="28">
+                                <StackPanel Height="200" Width="320">
+                                    <net401:FilterBuilderControl Margin="2,2,6,2"
+			RawCollection="{Binding Entities}"
+			FilteredCollection="{Binding FilteredEntities}"/>
+                                    <CheckBox Margin="6" IsChecked="{Binding IsHideVertexes,Mode=TwoWay}">Hide vertexes been filtered</CheckBox>
+                                </StackPanel>
+                            </orctk:DropDownButton>
+                        </DockPanel>
                     </Border>
 
                     <graphxctrl:ZoomControl x:Name="zoomctrl" MinZoom=".1" MaxZoom="2" ZoomDeltaMultiplier="50" Grid.Row="1">

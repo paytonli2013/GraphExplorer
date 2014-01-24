@@ -3,14 +3,58 @@ using Microsoft.Practices.Prism.Commands;
 using Orc.GraphExplorer.Model;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+using System.Windows;
+using System.Windows.Data;
 
 namespace Orc.GraphExplorer
 {
     public class GraphExplorerViewmodel : NotificationObject, IObserver<IOperation>
     {
         #region Properties
+
+        List<IDisposable> _observers = new List<IDisposable>();
+        IEnumerable<DataVertex> _vertexes;
+        IEnumerable<DataEdge> _edges;
+        bool _isHideVertexes;
+
+        public bool IsHideVertexes
+        {
+            get { return _isHideVertexes; }
+            set { _isHideVertexes = value; RaisePropertyChanged("IsHideVertexes"); }
+        }
+
+        ObservableCollection<FilterEntity> filteredEntities = new ObservableCollection<FilterEntity>();
+
+        public ObservableCollection<FilterEntity> FilteredEntities
+        {
+            get
+            {
+                return filteredEntities;
+            }
+            set
+            {
+                filteredEntities = value;
+                RaisePropertyChanged("FilteredEntities");
+            }
+        }
+
+        ObservableCollection<FilterEntity> entities;
+
+        public ObservableCollection<FilterEntity> Entities
+        {
+            get
+            {
+                return entities;
+            }
+            set
+            {
+                entities = value;
+                RaisePropertyChanged("Entities");
+            }
+        }
 
         private List<int> _selectedVertices = new List<int>();
 
@@ -168,6 +212,99 @@ namespace Orc.GraphExplorer
         {
             _operationsRedo = new List<IOperation>();
             _operations = new List<IOperation>();
+
+            IsHideVertexes = true;
+            FilteredEntities.CollectionChanged += FilteredEntities_CollectionChanged;
+        }
+
+        //Summary
+        //    handler of FilteredEntities's CollectionChanged event
+        void FilteredEntities_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            switch (e.Action)
+            {
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Add:
+                    foreach (var item in e.NewItems.OfType<FilterEntity>())
+                    {
+                        if (IsHideVertexes)
+                        {
+                            UpdateVertexVisibility(item);
+                        }
+                        else
+                        {
+                            UpdateVertexIsEnabled(item);
+                        }
+                    }
+                    break;
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Remove:
+                    break;
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Replace:
+                    break;
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Reset:
+                    if (IsHideVertexes)
+                    {
+                        SetVertexesVisibility(false);
+                    }
+                    else
+                    {
+                        SetVertexesVisibility(true);
+                        SetVertexesIsEnabled(false);
+                    }
+
+                    break;
+            }
+            //throw new NotImplementedException();
+        }
+
+        private void UpdateVertexIsEnabled(FilterEntity item)
+        {
+            var vertex = _vertexes.FirstOrDefault(v => v == item.Vertex);
+            if (vertex != null)
+            {
+                 vertex.IsEnabled = true;
+            }
+        }
+
+        private void SetVertexesIsEnabled(bool value)
+        {
+            if (_vertexes == null)
+                return;
+
+            foreach (var vertex in _vertexes)
+            {
+                vertex.IsEnabled = value;
+            }
+        }
+
+        //Summary
+        //    Update visibility of  specific vertex
+        private void UpdateVertexVisibility(FilterEntity item)
+        {
+            //throw new NotImplementedException();
+            var vertex = _vertexes.FirstOrDefault(v => v == item.Vertex);
+            if (vertex != null)
+            {
+                vertex.IsVisible = true;
+
+                foreach (var edge in _edges.Where(e => e.Source.Id == vertex.Id || e.Target.Id == vertex.Id))
+                {
+                    edge.IsVisible = true;
+                }
+            }
+        }
+
+        //Summary
+        //    hide all vertexes in graph
+        private void SetVertexesVisibility(bool value)
+        {
+            //throw new NotImplementedException();
+            if (_vertexes == null)
+                return;
+
+            foreach (var vertex in _vertexes)
+            {
+                vertex.IsVisible = value;
+            }
         }
 
         //Summary
@@ -323,12 +460,16 @@ namespace Orc.GraphExplorer
             Do(value);
         }
 
-        List<IDisposable> _observers = new List<IDisposable>();
-
         public void OnVertexLoaded(IEnumerable<DataVertex> vertexes, bool clearHistory = false)
         {
             if (clearHistory)
                 _observers.Clear();
+
+            if (vertexes == null)
+                return;
+
+            _vertexes = vertexes;
+            _edges = View.Area.EdgesList.Keys;
 
             foreach (var vertex in vertexes)
             {
@@ -336,6 +477,10 @@ namespace Orc.GraphExplorer
                 vertex.OnPositionChanged -= vertex_OnPositionChanged;
                 vertex.OnPositionChanged += vertex_OnPositionChanged;
             }
+
+            Entities = new ObservableCollection<FilterEntity>(FilterEntity.GenerateFilterEntities(vertexes));
+
+            SetVertexesVisibility(true);
         }
 
         void vertex_OnPositionChanged(object sender, DataVertex.VertexPositionChangedEventArgs e)
@@ -353,5 +498,54 @@ namespace Orc.GraphExplorer
         }
 
         #endregion
+
+        //Summary
+        //    binding in style will be overrided in graph control, so need create binding after data loaded
+        public void SetVertexPropertiesBinding()
+        {
+            var graph = View.Area;
+            IValueConverter conv = Orc.GraphExplorer.Converter.BoolToVisibilityConverter.Instance;
+
+            foreach (var vertex in graph.VertexList)
+            {
+                var bindingIsVisible = new Binding("IsVisible")
+                {
+                    Source = vertex.Key,
+                    Mode = BindingMode.TwoWay,
+                    Converter = conv
+                };
+
+                var bindingIsEnabled = new Binding("IsEnabled")
+                {
+                    Source = vertex.Key,
+                    Mode = BindingMode.TwoWay
+                };
+
+                vertex.Value.SetBinding(UIElement.VisibilityProperty, bindingIsVisible);
+                vertex.Value.SetBinding(UIElement.IsEnabledProperty, bindingIsEnabled);
+
+                foreach (var edge in graph.GetRelatedControls(vertex.Value, GraphControlType.Edge, EdgesType.All).OfType<EdgeControl>())
+                {
+                    if (edge.GetBindingExpression(UIElement.VisibilityProperty) != null)
+                        continue;
+
+                    bindingIsVisible = new Binding("IsVisible")
+                    {
+                        Source = vertex.Key,
+                        Mode = BindingMode.TwoWay,
+                        Converter = conv
+                    };
+
+                    bindingIsEnabled = new Binding("IsEnabled")
+                    {
+                        Source = vertex.Key,
+                        Mode = BindingMode.TwoWay
+                    };
+
+                    edge.SetBinding(UIElement.VisibilityProperty, bindingIsVisible);
+                    edge.SetBinding(UIElement.IsEnabledProperty, bindingIsEnabled);
+                }
+            }
+        }
     }
 }

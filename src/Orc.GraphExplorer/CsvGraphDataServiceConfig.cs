@@ -29,5 +29,13 @@ namespace Orc.GraphExplorer
             get { return (string)base["edgesFilePath"]; }
             set { base["edgesFilePath"] = value; }
         }
+
+        [ConfigurationProperty("enableCache",DefaultValue = true)]
+        public bool EnableCache
+        {
+            get { return (bool)base["enableCache"]; }
+            set { base["enableCache"] = value; }
+        }
+
     }
 }

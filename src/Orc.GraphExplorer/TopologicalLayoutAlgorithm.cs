@@ -17,9 +17,10 @@ namespace Orc.GraphExplorer
     {
         TGraph _graph;
         double _rate;
-        public TopologicalLayoutAlgorithm(TGraph graph,double _rate)
+        public TopologicalLayoutAlgorithm(TGraph graph,double rate)
         {
             _graph = graph;
+            _rate = rate;
         }
 
         public void Compute()
