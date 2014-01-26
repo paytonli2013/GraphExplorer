@@ -9,7 +9,7 @@ namespace Orc.GraphExplorer
 {
     public class CreateEdgeOperation : EdgeOperation
     {
-        const string CreateEdge = "Create Edge";
+        public const string CreateEdge = "Create Edge";
         public override string Sammary
         {
             get { return CreateEdge; }

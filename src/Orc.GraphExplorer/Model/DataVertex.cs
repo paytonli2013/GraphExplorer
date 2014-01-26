@@ -78,7 +78,7 @@ namespace Orc.GraphExplorer
                 if (_dragStartY)
                 {
                     originalY = y;
-                    _dragStartX = false;
+                    _dragStartY = false;
                 }
 
                 RaisePropertyChanged("Y");

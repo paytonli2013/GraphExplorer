@@ -13,7 +13,7 @@ namespace Orc.GraphExplorer
         public DeletePropertyOperation(DataVertex vertex)
             : base(vertex, null)
         {
-
+            base.Sammary = "Delete Property";
         }
 
         public override void Do()

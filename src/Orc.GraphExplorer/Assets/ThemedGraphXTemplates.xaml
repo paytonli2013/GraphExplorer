@@ -13,6 +13,7 @@
     <!--TabControl-->
     <Color x:Key="AccentColor" >#FF205A95</Color>
     <Color x:Key="AccentColor2" >#FA428AD1</Color>
+    <SolidColorBrush x:Key="StatusBar.Backround" Color="{StaticResource AccentColor}"/>
     <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
     <SolidColorBrush x:Key="AccentBrush2" Color="{StaticResource AccentColor2}"/>
     <SolidColorBrush x:Key="TabItem.Selected.Background" Color="{StaticResource AccentColor}"/>

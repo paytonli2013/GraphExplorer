@@ -27,6 +27,7 @@
     <Grid Name="root">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <TabControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <TabItem  Name="overrallTab" FontWeight="Bold">
@@ -80,6 +81,7 @@
                             <TextBlock DockPanel.Dock="Left" Foreground="{StaticResource AccentBrush}" Width="30" Text="{Binding Path=Zoom,ElementName=zoomctrl,StringFormat='{}{0:P0}'}" FontSize="10" FontWeight="Normal" VerticalAlignment="Center" Margin="2"/>
                             <ToggleButton DockPanel.Dock="Left" Margin="1" Style="{StaticResource ToggleButtonStyle}" Width="28" Content="Fill" IsChecked="{Binding Mode,ElementName=zoomctrl,Converter={StaticResource equalityConverter},ConverterParameter={x:Static Controls:ZoomControlModes.Fill}}" />
                             <ToggleButton DockPanel.Dock="Left" Margin="1" Style="{StaticResource ToggleButtonStyle}" Width="28" Content="1:1" IsChecked="{Binding Mode,ElementName=zoomctrl,Converter={StaticResource equalityConverter},ConverterParameter={x:Static Controls:ZoomControlModes.Original}}" />
+                            <Rectangle  DockPanel.Dock="Left" Fill="{StaticResource NormalBorderBrush}" Width="1" VerticalAlignment="Stretch" Margin="4"/>
                             <orctk:DropDownButton ToolTip="Filter" Style="{StaticResource FilterButtonStyle}" HorizontalAlignment="Left" DockPanel.Dock="Left" Height="28" Width="28">
                                 <StackPanel Height="200" Width="320">
                                     <net401:FilterBuilderControl Margin="2,2,6,2"
@@ -154,5 +156,11 @@
         </Border>-->
         <Button Height="22" Width="22" Margin="2,1" VerticalAlignment="Top" HorizontalAlignment="Right" Style="{StaticResource SettingButtonStyle}" ToolTip="Open Setting" Name="btnSetting" Click="btnSetting_Click"/>
         <local:SettingView Grid.RowSpan="2" Visibility="Collapsed" SettingApplied="settingView_SettingApplied" x:Name="settingView"/>
+        <Border x:Name="StatusBar" Grid.Row="1" Background="{DynamicResource StatusBar.Backround}">
+            <StackPanel Orientation="Horizontal" Margin="6,2">
+                <Image />
+                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="White" Text="{Binding StatusMessage,Mode=OneWay}"/>
+            </StackPanel>
+        </Border>
     </Grid>
 </UserControl>

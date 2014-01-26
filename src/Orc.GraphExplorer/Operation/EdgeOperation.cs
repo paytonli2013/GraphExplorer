@@ -12,10 +12,11 @@ namespace Orc.GraphExplorer
     /// </summary>
     public abstract class EdgeOperation : IOperation
     {
-        const string Edge = "Operate Edge";
+        string Edge = "Operate Edge";
         public virtual string Sammary
         {
             get { return Edge; }
+            protected set { Edge = value; }
         }
 
         ///Summary

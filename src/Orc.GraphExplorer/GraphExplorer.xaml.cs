@@ -319,7 +319,7 @@ namespace Orc.GraphExplorer
             //This property sets edge routing algorithm that is used to build route paths according to algorithm logic.
             //For ex., SimpleER algorithm will try to set edge paths around vertices so no edge will intersect any vertex.
             //Bundling algorithm will try to tie different edges that follows same direction to a single channel making complex graphs more appealing.
-            area.DefaultEdgeRoutingAlgorithm = GraphX.EdgeRoutingAlgorithmTypeEnum.SimpleER;
+            area.DefaultEdgeRoutingAlgorithm = GraphX.EdgeRoutingAlgorithmTypeEnum.None;
 
             //This property sets async algorithms computation so methods like: Area.RelayoutGraph() and Area.GenerateGraph()
             //will run async with the UI thread. Completion of the specified methods can be catched by corresponding events:
@@ -609,7 +609,6 @@ namespace Orc.GraphExplorer
             {
                 DragBehaviour.SetIsDragEnabled(item.Value, canDrag);
             }
-            //throw new NotImplementedException();
         }
 
         void Value_PositionChanged(object sender, GraphX.Models.VertexPositionEventArgs args)

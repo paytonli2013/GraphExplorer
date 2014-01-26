@@ -18,6 +18,19 @@ namespace Orc.GraphExplorer
         List<IDisposable> _observers = new List<IDisposable>();
         IEnumerable<DataVertex> _vertexes;
         IEnumerable<DataEdge> _edges;
+
+        string _statusMessage;
+
+        public string StatusMessage
+        {
+            get { return _statusMessage; }
+            set
+            {
+                _statusMessage = value;
+                RaisePropertyChanged("StatusMessage");
+            }
+        }
+
         bool _isHideVertexes;
 
         public bool IsHideVertexes
@@ -261,7 +274,7 @@ namespace Orc.GraphExplorer
             var vertex = _vertexes.FirstOrDefault(v => v == item.Vertex);
             if (vertex != null)
             {
-                 vertex.IsEnabled = true;
+                vertex.IsEnabled = true;
             }
         }
 
@@ -324,6 +337,9 @@ namespace Orc.GraphExplorer
 
             UndoCommand.RaiseCanExecuteChanged();
             RedoCommand.RaiseCanExecuteChanged();
+
+            if (!string.IsNullOrEmpty(operation.Sammary))
+                PostStatusMessage(operation.Sammary);
         }
 
         //Summary
@@ -333,11 +349,14 @@ namespace Orc.GraphExplorer
             _selectedVertices.Clear();
             _operations.Clear();
             _operationsRedo.Clear();
+
             UndoCommand.RaiseCanExecuteChanged();
             RedoCommand.RaiseCanExecuteChanged();
             HasChange = false;
 
             IsInEditing = false;
+
+            PostStatusMessage("Ready");
         }
 
         #region Commands
@@ -368,6 +387,9 @@ namespace Orc.GraphExplorer
 
             UndoCommand.RaiseCanExecuteChanged();
             RedoCommand.RaiseCanExecuteChanged();
+
+            if (!string.IsNullOrEmpty(op.Sammary))
+                PostStatusMessage("Undo " + op.Sammary);
         }
 
         bool CanExecuteUndo()
@@ -401,6 +423,9 @@ namespace Orc.GraphExplorer
 
             UndoCommand.RaiseCanExecuteChanged();
             RedoCommand.RaiseCanExecuteChanged();
+
+            if (!string.IsNullOrEmpty(op.Sammary))
+                PostStatusMessage("Redo " + op.Sammary);
         }
 
         bool CanExecuteRedo()
@@ -481,6 +506,8 @@ namespace Orc.GraphExplorer
             Entities = new ObservableCollection<FilterEntity>(FilterEntity.GenerateFilterEntities(vertexes));
 
             SetVertexesVisibility(true);
+
+            PostStatusMessage("Ready");
         }
 
         void vertex_OnPositionChanged(object sender, DataVertex.VertexPositionChangedEventArgs e)
@@ -499,6 +526,7 @@ namespace Orc.GraphExplorer
 
         #endregion
 
+        #region Set Vertex Binding
         //Summary
         //    binding in style will be overrided in graph control, so need create binding after data loaded
         public void SetVertexPropertiesBinding()
@@ -547,5 +575,13 @@ namespace Orc.GraphExplorer
                 }
             }
         }
+        #endregion
+
+        #region Post Status Message
+        public void PostStatusMessage(string message)
+        {
+            StatusMessage = message;
+        }
+        #endregion
     }
 }

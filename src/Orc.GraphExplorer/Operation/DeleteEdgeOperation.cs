@@ -13,6 +13,7 @@ namespace Orc.GraphExplorer
             : base(graph, source, target, callback, undoCallback)
         {
             _Edge = edge;
+            base.Sammary = "Delete Edge";
         }
 
         public override void Do()
