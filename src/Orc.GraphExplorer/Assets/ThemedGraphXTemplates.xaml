@@ -13,7 +13,8 @@
     <!--TabControl-->
     <Color x:Key="AccentColor" >#FF205A95</Color>
     <Color x:Key="AccentColor2" >#FA428AD1</Color>
-    <SolidColorBrush x:Key="StatusBar.Backround" Color="{StaticResource AccentColor}"/>
+    <Color x:Key="AccentColor3" >#FA0A3C6C</Color>
+    <SolidColorBrush x:Key="StatusBar.Backround" Color="{StaticResource AccentColor3}"/>
     <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
     <SolidColorBrush x:Key="AccentBrush2" Color="{StaticResource AccentColor2}"/>
     <SolidColorBrush x:Key="TabItem.Selected.Background" Color="{StaticResource AccentColor}"/>
@@ -638,6 +639,47 @@
         </Setter>
     </Style>
 
+    <Style x:Key="AddLinkToggleButtonStyle" TargetType="{x:Type ToggleButton}">
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Padding" Value="1"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ToggleButton}">
+                    <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="true">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Name="checkedBorder" Grid.ColumnSpan="2" BorderThickness="1" Opacity="0" BorderBrush="{StaticResource Button.MouseOver.Border}" Background="{StaticResource Button.MouseOver.Background}"/>
+                            <ContentPresenter x:Name="contentPresenter" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                            <Path Name="path" Margin="8" Stretch="Fill" Fill="{StaticResource AccentBrush}" Data="F1 M 23,55L 18,55L 18,50L 21,50L 53,24L 53,21L 58,21L 58,26L 55,26L 23,52L 23,55 Z M 54,22L 54,25L 57,25L 57,22L 54,22 Z M 19,51L 19,54L 22,54L 22,51L 19,51 Z "/>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter Property="TextElement.Foreground" TargetName="contentPresenter" Value="{StaticResource Button.Disabled.Foreground}"/>
+                            <Setter Property="Fill" TargetName="path" Value="{StaticResource Button.Disabled.Foreground}"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="true">
+                            <Setter Property="Background" TargetName="border" Value="{StaticResource Button.MouseOver.Background}"/>
+                            <Setter Property="BorderBrush" TargetName="border" Value="{StaticResource Button.MouseOver.Border}"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter Property="Opacity" TargetName="checkedBorder" Value="1"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="False">
+                            <Setter Property="Opacity" TargetName="checkedBorder" Value="0"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
     <Style x:Key="DragToggleButtonStyle" TargetType="{x:Type ToggleButton}">
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="BorderBrush" Value="Transparent"/>

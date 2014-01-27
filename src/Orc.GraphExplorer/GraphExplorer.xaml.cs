@@ -29,6 +29,31 @@ namespace Orc.GraphExplorer
     /// </summary>
     public partial class GraphExplorer : UserControl
     {
+        [Flags]
+        public enum GraphExplorerStatus
+        {
+            Ready,
+            Editing,
+            EnableDrag,
+            DragToCreateVertex,
+            CreateLinkSelectSource,
+            CreateLinkSelectTarget,
+            Dragging
+        }
+
+        private PathGeometry _edGeo;
+        private VertexControl _edVertex;
+        private EdgeControl _edEdge;
+        private DataVertex _edFakeDV;
+
+        GraphExplorerStatus _status;
+
+        public GraphExplorerStatus Status
+        {
+            get { return _status; }
+            private set { _status = value; }
+        }
+
         private List<int> _selectedVertices = new List<int>();
 
         Queue<NavigateHistoryItem> _navigateHistory = new Queue<NavigateHistoryItem>();
@@ -86,7 +111,6 @@ namespace Orc.GraphExplorer
             FitToBounds(null, zoom);
 
             _viewmodel.SetVertexPropertiesBinding();
-
         }
 
         private void ShowAllEdgesLabels(GraphArea area, bool show)
@@ -133,6 +157,38 @@ namespace Orc.GraphExplorer
             {
                 //if (DragBehaviour.GetIsDragging(args.VertexControl)) return;
                 SelectVertex(args.VertexControl);
+
+                if (IsInEditMode && _status.HasFlag(GraphExplorerStatus.CreateLinkSelectSource))
+                {
+                    if (_edVertex == null) //select starting vertex
+                    {
+                        _edVertex = args.VertexControl;
+                        _edFakeDV = new DataVertex() { ID = -666 };
+                        _edGeo = new PathGeometry(new PathFigureCollection() { new PathFigure() { IsClosed = false, StartPoint = _edVertex.GetPosition(), Segments = new PathSegmentCollection() { new PolyLineSegment(new List<Point>() { new Point() }, true) } } });
+                        var pos = zoomctrl.TranslatePoint(args.VertexControl.GetPosition(), Area);
+                        var lastseg = _edGeo.Figures[0].Segments[_edGeo.Figures[0].Segments.Count - 1] as PolyLineSegment;
+                        lastseg.Points[lastseg.Points.Count - 1] = pos;
+
+                        var dedge = new DataEdge(_edVertex.Vertex as DataVertex, _edFakeDV);
+                        _edEdge = new EdgeControl(_edVertex, null, dedge) { ManualDrawing = true };
+                        Area.AddEdge(dedge, _edEdge);
+                        Area.Graph.AddVertex(_edFakeDV);
+                        Area.Graph.AddEdge(dedge);
+                        _edEdge.SetEdgePathManually(_edGeo);
+                        _status = GraphExplorerStatus.CreateLinkSelectTarget;
+                        _viewmodel.PostStatusMessage("Select Target Node");
+                    }
+                    else if (_edVertex != args.VertexControl && _status.HasFlag(GraphExplorerStatus.CreateLinkSelectTarget)) //finish draw
+                    {
+                        _viewmodel.CreateEdge((_edVertex.Vertex as DataVertex).Id, (args.VertexControl.Vertex as DataVertex).Id);
+
+                        ClearEdgeDrawing();
+
+                        _status = GraphExplorerStatus.Ready;
+
+                        tbnNewEdge.IsChecked = false;
+                    }
+                }
             }
             else if (args.MouseArgs.RightButton == MouseButtonState.Pressed && IsInEditMode)
             {
@@ -141,6 +197,22 @@ namespace Orc.GraphExplorer
                 miDeleteVertex.Click += miDeleteVertex_Click;
                 args.VertexControl.ContextMenu.Items.Add(miDeleteVertex);
             }
+        }
+
+        void ClearEdgeDrawing()
+        {
+            if (_edFakeDV != null)
+                Area.Graph.RemoveVertex(_edFakeDV);
+            if (_edEdge != null)
+            {
+                var edge = _edEdge.Edge as DataEdge;
+                Area.Graph.RemoveEdge(edge);
+                Area.RemoveEdge(edge);
+            }
+            _edGeo = null;
+            _edFakeDV = null;
+            _edVertex = null;
+            _edEdge = null;
         }
 
         void miDeleteVertex_Click(object sender, RoutedEventArgs e)
@@ -222,7 +294,7 @@ namespace Orc.GraphExplorer
             //overrallGraph.get
             var historyItem = GetHistoryItem(dataVertex, overrallGraph);
 
-            CreateGraphArea(AreaNav, historyItem.Vertexes, historyItem.Edges,0);
+            CreateGraphArea(AreaNav, historyItem.Vertexes, historyItem.Edges, 0);
 
             //var dispatcher = AreaNav.Dispatcher;
 
@@ -239,7 +311,7 @@ namespace Orc.GraphExplorer
                     zoom.ZoomToFill();
                     zoom.Mode = ZoomControlModes.Custom;
                     //zoom.FitToBounds();
-                }), DispatcherPriority.Background);
+                }), DispatcherPriority.Loaded);
             }
             else
             {
@@ -334,7 +406,7 @@ namespace Orc.GraphExplorer
         {
             Vertexes = new List<DataVertex>(vertexes);
 
-            CreateGraphArea(Area, Vertexes, Edges,600);
+            CreateGraphArea(Area, Vertexes, Edges, 600);
 
             HookVertexEvent(Area);
 
@@ -389,7 +461,7 @@ namespace Orc.GraphExplorer
             GraphDataService.GetVertexes(OnVertexesLoaded, OnError);
         }
 
-        private void CreateGraphArea(GraphArea area, IEnumerable<DataVertex> vertexes, IEnumerable<DataEdge> edges,double offsetY)
+        private void CreateGraphArea(GraphArea area, IEnumerable<DataVertex> vertexes, IEnumerable<DataEdge> edges, double offsetY)
         {
             area.ClearLayout();
 
@@ -771,14 +843,17 @@ namespace Orc.GraphExplorer
         {
             try
             {
-                if (_selectedVertices.Count == 2)
+                UpdateHighlightBehaviour(true);
+
+                if (tbnNewEdge.IsChecked.HasValue && tbnNewEdge.IsChecked.Value)
                 {
-                    _viewmodel.CreateEdge(_selectedVertices[0], _selectedVertices[1]);
-                    //FitToBounds(Area.Dispatcher, zoomctrl);
+                    _status = _status | GraphExplorerStatus.CreateLinkSelectSource;
+                    _viewmodel.PostStatusMessage("Select Source Node");
                 }
                 else
                 {
-                    ShowAlertMessage("plase select 2 and only 2 nodes before create a relationship");
+                    ClearEdgeDrawing();
+                    _viewmodel.PostStatusMessage("Exit Create Link");
                 }
             }
             catch (Exception ex)
@@ -799,9 +874,9 @@ namespace Orc.GraphExplorer
             }
         }
 
-        private void CreateVertex(GraphArea area, ZoomControl zoom)
+        private void CreateVertex(GraphArea area, ZoomControl zoom, DataVertex data = null, double x = double.MinValue, double y = double.MinValue)
         {
-            _viewmodel.Do(new CreateVertexOperation(Area, null,
+            _viewmodel.Do(new CreateVertexOperation(Area, data, x, y,
                 (v, vc) =>
                 {
                     _selectedVertices.Add(v.Id);
@@ -886,7 +961,7 @@ namespace Orc.GraphExplorer
             }
         }
 
-        public static void RunCodeInUiThread(Action action, Dispatcher dispatcher = null, DispatcherPriority priority = DispatcherPriority.Background)
+        public static void RunCodeInUiThread(Action action, Dispatcher dispatcher = null, DispatcherPriority priority = DispatcherPriority.Loaded)
         {
             if (action == null)
                 return;
@@ -901,6 +976,48 @@ namespace Orc.GraphExplorer
             else
             {
                 action.Invoke();
+            }
+        }
+
+        //drag to add new node
+        private void tbnNewNode_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            var data = new DataObject(typeof(object), new object());
+            DragDrop.DoDragDrop(tbnNewNode, data, DragDropEffects.Copy);
+        }
+
+        private void zoomctrl_PreviewDrop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(typeof(object)))
+            {
+                //how to get dragged data by its type
+                var myobject = e.Data.GetData(typeof(object)) as object;
+
+                var pos = zoomctrl.TranslatePoint(e.GetPosition(zoomctrl), Area);
+
+                var data = DataVertex.Create();
+
+                CreateVertex(Area, zoomctrl, data, pos.X, pos.Y);
+            }
+        }
+
+        //handle create link between two node
+        private void zoomctrl_PreviewMouseMove(object sender, MouseEventArgs e)
+        {
+            if (_status.HasFlag(GraphExplorerStatus.CreateLinkSelectTarget) && _edGeo != null && _edEdge != null && _edVertex != null)
+            {
+                var pos = zoomctrl.TranslatePoint(e.GetPosition(zoomctrl), Area);
+                var lastseg = _edGeo.Figures[0].Segments[_edGeo.Figures[0].Segments.Count - 1] as PolyLineSegment;
+                lastseg.Points[lastseg.Points.Count - 1] = pos;
+                _edEdge.SetEdgePathManually(_edGeo);
+            }
+        }
+
+        private void zoomctrl_DragEnter(object sender, DragEventArgs e)
+        {
+            if (!e.Data.GetDataPresent(typeof(object)) || sender == e.Source)
+            {
+                e.Effects = DragDropEffects.None;
             }
         }
     }

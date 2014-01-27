@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows;
+using System.Windows.Threading;
 
 namespace Orc.GraphExplorer
 {
@@ -75,5 +77,40 @@ namespace Orc.GraphExplorer
             _undoCallback = null;
             _graph = null;
         }
+
+
+        public static void RunCodeInUiThread<T>(Action<T> action, T parameter, Dispatcher dispatcher = null, DispatcherPriority priority = DispatcherPriority.Background)
+        {
+            if (action == null)
+                return;
+
+            if (dispatcher != null)
+            {
+                dispatcher.BeginInvoke(action, priority, parameter);
+            }
+            else
+            {
+                action.Invoke(parameter);
+            }
+        }
+
+        public static void RunCodeInUiThread(Action action, Dispatcher dispatcher = null, DispatcherPriority priority = DispatcherPriority.Background)
+        {
+            if (action == null)
+                return;
+
+            if (dispatcher == null && Application.Current != null)
+                dispatcher = Application.Current.Dispatcher;
+
+            if (dispatcher != null)
+            {
+                dispatcher.BeginInvoke(action, priority);
+            }
+            else
+            {
+                action.Invoke();
+            }
+        }
+
     }
 }

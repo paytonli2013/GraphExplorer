@@ -56,8 +56,8 @@
                             <ToggleButton DockPanel.Dock="Left" Style="{StaticResource DragToggleButtonStyle}" IsChecked="{Binding CanDrag,Mode=TwoWay}" Height="28" Width="28" ToolTip="Enable Drag" Name="tbtnCanDrag"/>
                             <ToggleButton DockPanel.Dock="Left" Style="{StaticResource EditToggleButtonStyle}" IsChecked="{Binding IsInEditing}" Height="28" Width="28" ToolTip="Enable Edit Mode" Name="tbtnCanEdit" Click="tbtnCanEdit_Click"/>
                             <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" Name="editPanel" Visibility="{Binding IsChecked,ElementName=tbtnCanEdit,Converter={StaticResource BoolToVisibilityConverter}}">
-                                <Button Height="28" DockPanel.Dock="Left" ToolTip="Create Link" Name="tbnNewEdge" Click="tbnNewEdge_Click" Width="28" Style="{StaticResource EdgeButtonStyle}"/>
-                                <Button Height="28" DockPanel.Dock="Left" ToolTip="Create Node" Name="tbnNewNode" Click="tbnNewNode_Click"  Width="28" Style="{StaticResource VertexButtonStyle}"/>
+                                <ToggleButton Height="28" DockPanel.Dock="Left" ToolTip="Create Link" Name="tbnNewEdge" Click="tbnNewEdge_Click" Width="28" Style="{StaticResource AddLinkToggleButtonStyle}"/>
+                                <Button Height="28" DockPanel.Dock="Left" ToolTip="Drag To Treate Node" Name="tbnNewNode" PreviewMouseLeftButtonDown="tbnNewNode_PreviewMouseLeftButtonDown"  Width="28" Style="{StaticResource VertexButtonStyle}"/>
                                 <Button Height="28" DockPanel.Dock="Left" ToolTip="Undo" Name="tbnUndo" Command="{Binding UndoCommand}" Width="28" Style="{StaticResource UndoButtonStyle}"/>
                                 <Button Height="28" DockPanel.Dock="Left" ToolTip="Redo" Name="tbnRedo" Command="{Binding RedoCommand}" Width="28" Style="{StaticResource RedoButtonStyle}"/>
                                 <Button Height="28" DockPanel.Dock="Left" ToolTip="Save Changes To Data Source" Name="tbnSaveChanges" Click="tbnSaveChanges_Click" Width="28" Style="{StaticResource SaveButtonStyle}"/>
@@ -93,7 +93,7 @@
                         </DockPanel>
                     </Border>
 
-                    <graphxctrl:ZoomControl x:Name="zoomctrl" MinZoom=".1" MaxZoom="2" ZoomDeltaMultiplier="50" Grid.Row="1">
+                    <graphxctrl:ZoomControl x:Name="zoomctrl" AllowDrop="True"  DragEnter="zoomctrl_DragEnter"  PreviewMouseMove="zoomctrl_PreviewMouseMove"  PreviewDrop="zoomctrl_PreviewDrop" MinZoom=".1" MaxZoom="2" ZoomDeltaMultiplier="50" Grid.Row="1">
                         <model:GraphArea x:Name="Area"/>
                     </graphxctrl:ZoomControl>
                 </Grid>
@@ -155,12 +155,12 @@
             </StackPanel>
         </Border>-->
         <Button Height="22" Width="22" Margin="2,1" VerticalAlignment="Top" HorizontalAlignment="Right" Style="{StaticResource SettingButtonStyle}" ToolTip="Open Setting" Name="btnSetting" Click="btnSetting_Click"/>
-        <local:SettingView Grid.RowSpan="2" Visibility="Collapsed" SettingApplied="settingView_SettingApplied" x:Name="settingView"/>
         <Border x:Name="StatusBar" Grid.Row="1" Background="{DynamicResource StatusBar.Backround}">
             <StackPanel Orientation="Horizontal" Margin="6,2">
                 <Image />
                 <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="White" Text="{Binding StatusMessage,Mode=OneWay}"/>
             </StackPanel>
         </Border>
+        <local:SettingView Grid.RowSpan="3" Visibility="Collapsed" Margin="-1" SettingApplied="settingView_SettingApplied" x:Name="settingView"/>
     </Grid>
 </UserControl>
